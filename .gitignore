@@ -49,6 +49,4 @@ next-env.d.ts
 /.windsurf/
 /.claude/skills/
 /skills-lock.json
-
-# Claude Code project instructions - kept on disk, not committed
 CLAUDE.md
