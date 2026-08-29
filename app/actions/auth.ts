@@ -4,7 +4,8 @@ import { z } from 'zod';
 import { db } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { redirect } from 'next/navigation';
-
+import { signIn } from '@/auth';
+import { AuthError } from 'next-auth';
 export type FormState = {
   error: string | null;
 };
@@ -15,7 +16,10 @@ const schema = z.object({
   password: z.string().min(8),
 });
 
-export async function registerUser(prevState: FormState, formData: FormData): Promise<FormState> {
+export const registerUser = async (
+  prevState: FormState,
+  formData: FormData,
+): Promise<FormState> => {
   const parsed = schema.safeParse({ name: formData.get('name'), email: formData.get('email'), password: formData.get('password') });
 
   if (!parsed.success) return { error: 'Check your details and try again' };
@@ -30,4 +34,21 @@ export async function registerUser(prevState: FormState, formData: FormData): Pr
   await db.user.create({ data: { name: parsed.data.name, email: parsed.data.email, hashedPassword } });
 
   redirect('/login?registered=1');
-}
+};
+
+export const loginAction = async (
+  prevState: FormState,
+  formData: FormData,
+): Promise<FormState> => {
+  try {
+    await signIn('credentials', {
+      email: formData.get('email'),
+      password: formData.get('password'),
+      redirectTo: '/',
+    });
+    return { error: null };
+  } catch (error) {
+    if (error instanceof AuthError) return { error: 'Invalid email or password' };
+    throw error;
+  }
+};
