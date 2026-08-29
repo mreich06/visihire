@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# VisiHire
+
+VisiHire is an AI-powered job search optimization platform designed to help job seekers boost their visibility, network smarter, and land more interviews. By leveraging advanced AI technologies and integrating with LinkedIn, VisiHire provides a suite of tools to streamline and optimize the job search process.
+
+## Features
+
+- **Manual Job Clapper**: Easily track job applications by copy-pasting job descriptions and saving the URL for reference.
+- **Kanban Tracking Board**: Visually manage your job search pipeline with a drag-and-drop kanban board.
+- **PDF Profile Parser**: Upload your LinkedIn profile PDF and let VisiHire analyze it for optimization insights.
+- **ATS Resume & LinkedIn Profile Auditor**: Get AI-powered feedback on your resume and LinkedIn profile, tailored to each job description.
+- **Hiring Manager Personalized Outreach**: Generate custom, targeted outreach messages for hiring managers and decision-makers.
+- **Structured Context Memory**: VisiHire's AI learns your authentic voice, tech philosophies, and background to create personalized, human-like content.
+- **Ghosting Detector & Follow-Up System**: Get alerted when it's time to follow up on an application and generate context-aware follow-up emails.
+- **Reverse Inbound Keyword Optimizer**: Discover trending keywords and skills from job listings to optimize your profile.
+- **One Post a Week**: Boost your organic visibility with AI-generated LinkedIn posts based on trending articles in your industry.
+
+## Tech Stack
+
+- [Next.js](https://nextjs.org)
+- [React](https://reactjs.org)
+- [Prisma](https://www.prisma.io)
+- [PostgreSQL](https://www.postgresql.org)
+- [OpenAI API](https://openai.com)
+
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository
 
-```bash
+git clone https://github.com/yourusername/visihire.git
+
+
+2. Install dependencies
+
+cd visihire
+npm install
+
+
+3. Set up your PostgreSQL database and update the `.env` file with your database URL
+
+DATABASE_URL="postgresql://username:password@localhost:5432/visihire?schema=public"
+
+
+4. Run database migrations
+
+npx prisma migrate dev
+
+
+5. Start the development server
+
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## License
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
