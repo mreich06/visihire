@@ -16,10 +16,7 @@ const schema = z.object({
   password: z.string().min(8),
 });
 
-export const registerUser = async (
-  prevState: FormState,
-  formData: FormData,
-): Promise<FormState> => {
+export const registerUser = async (prevState: FormState, formData: FormData): Promise<FormState> => {
   const parsed = schema.safeParse({ name: formData.get('name'), email: formData.get('email'), password: formData.get('password') });
 
   if (!parsed.success) return { error: 'Check your details and try again' };
@@ -33,13 +30,14 @@ export const registerUser = async (
   const hashedPassword = await bcrypt.hash(parsed.data.password, 12);
   await db.user.create({ data: { name: parsed.data.name, email: parsed.data.email, hashedPassword } });
 
-  redirect('/login?registered=1');
+  await signIn('credentials', {
+    email: parsed.data.email,
+    password: parsed.data.password,
+    redirectTo: '/',
+  });
 };
 
-export const loginAction = async (
-  prevState: FormState,
-  formData: FormData,
-): Promise<FormState> => {
+export const loginAction = async (prevState: FormState, formData: FormData): Promise<FormState> => {
   try {
     await signIn('credentials', {
       email: formData.get('email'),
