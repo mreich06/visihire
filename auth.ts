@@ -7,7 +7,7 @@ import { db } from '@/lib/db';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db),
-  session: { strategy: 'jwt' },
+  session: { strategy: 'jwt' }, // token with user id, as session
   pages: { signIn: '/login' },
   providers: [
     Credentials({
