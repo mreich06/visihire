@@ -30,11 +30,17 @@ export const registerUser = async (prevState: FormState, formData: FormData): Pr
   const hashedPassword = await bcrypt.hash(parsed.data.password, 12);
   await db.user.create({ data: { name: parsed.data.name, email: parsed.data.email, hashedPassword } });
 
-  await signIn('credentials', {
-    email: parsed.data.email,
-    password: parsed.data.password,
-    redirectTo: '/',
-  });
+  try {
+    await signIn('credentials', {
+      email: parsed.data.email,
+      password: parsed.data.password,
+      redirectTo: '/',
+    });
+    return { error: null };
+  } catch (error) {
+    if (error instanceof AuthError) return { error: 'Account created, but sign-in failed. Try logging in.' };
+    throw error;
+  }
 };
 
 export const loginAction = async (prevState: FormState, formData: FormData): Promise<FormState> => {
