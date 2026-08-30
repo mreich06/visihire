@@ -8,6 +8,10 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      DATABASE_URL_UNPOOLED: postgresql://ci:ci@localhost:5432/ci
+      AUTH_SECRET: ci-placeholder-not-a-real-secret
     steps:
       - uses: actions/checkout@v4
 
@@ -18,12 +22,12 @@ jobs:
 
       - run: npm ci
 
+      - run: npx next typegen
+
       - run: npm run lint
 
       - run: npx tsc --noEmit
 
+      - run: npx vitest run
+
       - run: npx next build
-        env:
-          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
-          DATABASE_URL_UNPOOLED: postgresql://ci:ci@localhost:5432/ci
-          AUTH_SECRET: ci-placeholder-not-a-real-secret
