@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { db } from '@/lib/db';
 import bcrypt from 'bcryptjs';
-import { signIn } from '@/auth';
+import { signIn, signOut } from '@/auth';
 import { AuthError } from 'next-auth';
 export type FormState = {
   error: string | null;
@@ -33,7 +33,7 @@ export const registerUser = async (prevState: FormState, formData: FormData): Pr
     await signIn('credentials', {
       email: parsed.data.email,
       password: parsed.data.password,
-      redirectTo: '/',
+      redirectTo: '/application-board',
     });
     return { error: null };
   } catch (error) {
@@ -47,11 +47,15 @@ export const loginAction = async (prevState: FormState, formData: FormData): Pro
     await signIn('credentials', {
       email: formData.get('email'),
       password: formData.get('password'),
-      redirectTo: '/',
+      redirectTo: '/application-board',
     });
     return { error: null };
   } catch (error) {
     if (error instanceof AuthError) return { error: 'Invalid email or password' };
     throw error;
   }
+};
+
+export const logoutAction = async () => {
+  await signOut({ redirectTo: '/login' });
 };
