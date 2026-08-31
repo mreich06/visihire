@@ -23,6 +23,7 @@ model User {
 
   accounts Account[]
   sessions Session[]
+  jobs     Job[]
 }
 
 model Account {
@@ -56,4 +57,30 @@ model VerificationToken {
   expires    DateTime
 
   @@id([identifier, token])
+}
+
+enum JobStatus {
+  WISHLIST
+  APPLIED
+  INTERVIEWING
+  OFFER
+  REJECTED
+}
+
+model Job {
+  id        String    @id @default(cuid())
+  userId    String
+  company   String
+  title     String
+  url       String?
+  jdText    String?
+  status    JobStatus @default(WISHLIST)
+  position  Int
+  notes     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  appliedAt DateTime?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
 }
