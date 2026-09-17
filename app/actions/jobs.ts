@@ -60,6 +60,8 @@ export const createJob = async (prevState: FormState, formData: FormData): Promi
   // add new job to the end of the wishlist
   await db.job.create({ data: { ...parsed.data, userId: user.id, position: position } });
 
+  // revalidatePath will re-run /application-board page.tsx
+  // causes getJobs to rerun, fetch new jobs, compare to prevJobs
   revalidatePath('/application-board');
 
   return { error: null };

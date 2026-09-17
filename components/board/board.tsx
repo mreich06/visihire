@@ -22,8 +22,19 @@ interface BoardProps {
 }
 
 const Board = ({ jobs }: BoardProps) => {
+  const [prevJobs, setPrevJobs] = useState(jobs);
   const [board, setBoard] = useState(jobs);
   const [modalOpen, setModalOpen] = useState(false);
+
+  // useEffect not used bc when new job saved, jobs props changes, then
+  // React renders old board state before effect,
+  // showing stale list. After paint, effect notices job changes
+  // and calls setBoard(jobs) to trigger second re-render, causing flash
+  // instead, check before render, to render the right list
+  if (jobs !== prevJobs) {
+    setPrevJobs(jobs);
+    setBoard(jobs);
+  }
 
   const handleDrop = (result: DropResult) => {
     const { source, destination, draggableId } = result;
