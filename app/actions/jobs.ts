@@ -5,7 +5,8 @@ import { requireUser } from '@/lib/auth-guard';
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import z from 'zod';
-import { FormState } from './auth';
+
+export type FormState = { error: string | null };
 
 const schema = z.object({
   company: z.string().trim().min(1),
