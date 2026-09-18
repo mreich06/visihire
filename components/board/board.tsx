@@ -7,7 +7,7 @@ import { moveJob } from '@/app/actions/jobs';
 import JobCard from '@/components/job-card';
 import type { Job, JobStatus } from '@/generated/prisma/client';
 import Modal from '../ui/modal';
-import AddJobForm from '../add-job-form';
+import JobForm from '../job-form';
 
 const COLUMNS: { status: JobStatus; label: string }[] = [
   { status: 'WISHLIST', label: 'Wishlist' },
@@ -25,6 +25,7 @@ const Board = ({ jobs }: BoardProps) => {
   const [prevJobs, setPrevJobs] = useState(jobs);
   const [board, setBoard] = useState(jobs);
   const [modalOpen, setModalOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
   // useEffect not used bc when new job saved, jobs props changes, then
   // React renders old board state before effect,
@@ -65,7 +66,13 @@ const Board = ({ jobs }: BoardProps) => {
       <div>
         <div className="flex justify-between">
           <h1 className="mb-6 text-xl font-semibold">Application Board</h1>
-          <button className="mb-6 text-base font-semibold bg-white rounded border border-gray-200 px-2 py-1" onClick={() => setModalOpen(true)}>
+          <button
+            className="mb-6 text-base font-semibold bg-white rounded border border-gray-200 px-2 py-1"
+            onClick={() => {
+              setSelectedJob(null);
+              setModalOpen(true);
+            }}
+          >
             Add job
           </button>
         </div>
@@ -87,7 +94,13 @@ const Board = ({ jobs }: BoardProps) => {
                       <Draggable draggableId={job.id} index={index} key={job.id}>
                         {(dragProvided) => (
                           <div ref={dragProvided.innerRef} {...dragProvided.draggableProps} {...dragProvided.dragHandleProps}>
-                            <JobCard job={job} />
+                            <JobCard
+                              job={job}
+                              onClick={() => {
+                                setModalOpen(true);
+                                setSelectedJob(job);
+                              }}
+                            />
                           </div>
                         )}
                       </Draggable>
@@ -101,7 +114,15 @@ const Board = ({ jobs }: BoardProps) => {
         </div>
       </div>
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-        <AddJobForm onSuccess={() => setModalOpen(false)} />
+        {modalOpen && (
+          <JobForm
+            job={selectedJob ?? undefined}
+            onSuccess={() => {
+              setSelectedJob(null);
+              setModalOpen(false);
+            }}
+          />
+        )}
       </Modal>
     </DragDropContext>
   );
