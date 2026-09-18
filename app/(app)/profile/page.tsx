@@ -1,15 +1,16 @@
 import { logoutAction } from '@/app/actions/auth';
+import { Button } from '@/components/ui/button';
 
 const Page = () => {
   return (
-    <>
-      <h1>Profile</h1>
+    <div className="flex flex-col gap-6">
+      <h1 className="text-xl font-semibold text-zinc-900">Profile</h1>
       <form action={logoutAction}>
-        <button type="submit" className="rounded bg-black px-3 py-2 text-sm font-medium text-white disabled:opacity-50">
+        <Button type="submit" variant="outline">
           Sign out
-        </button>
+        </Button>
       </form>
-    </>
+    </div>
   );
 };
 
