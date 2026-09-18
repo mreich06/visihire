@@ -55,13 +55,13 @@ const WorkflowSection = () => {
 
   return (
     <section id="workflow" className="mx-auto max-w-6xl px-6 pb-28">
-      <div className="mb-12">
-        <p className="text-xs font-semibold tracking-wide text-accent-600 uppercase">Workflow</p>
-        <h2 className="mt-2 text-3xl font-semibold text-zinc-900">Apply with an actual strategy.</h2>
-      </div>
-
       <div ref={containerRef} className="relative h-[300vh]">
-        <div className="sticky top-0 flex h-screen items-start">
+        <div className="sticky top-0 py-12">
+          <div className="mb-12">
+            <p className="text-xs font-semibold tracking-wide text-accent-600 uppercase">Workflow</p>
+            <h2 className="mt-2 text-3xl font-semibold text-zinc-900">Apply with an actual strategy.</h2>
+          </div>
+
           <div className="grid w-full gap-10 lg:grid-cols-2 lg:gap-16">
             <div className="flex flex-col gap-6">
               {STEPS.map((step, i) => (
