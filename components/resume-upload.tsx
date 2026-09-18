@@ -38,9 +38,7 @@ export const ResumeUpload = ({ resumeFileName, resumeText }: ResumeUploadProps) 
           <FileText className="mt-0.5 h-5 w-5 shrink-0 text-primary-600" />
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-zinc-900">{resumeFileName}</p>
-            {resumeText && (
-              <p className="mt-1 line-clamp-2 text-xs text-zinc-500">{resumeText}</p>
-            )}
+            {resumeText && <p className="mt-1 line-clamp-2 text-xs text-zinc-500">{resumeText}</p>}
           </div>
         </div>
       )}
@@ -51,6 +49,7 @@ export const ResumeUpload = ({ resumeFileName, resumeText }: ResumeUploadProps) 
           type="file"
           name="resume"
           accept="application/pdf"
+          aria-label="Upload resume"
           className="hidden"
           onChange={() => formRef.current?.requestSubmit()}
         />
@@ -74,11 +73,7 @@ export const ResumeUpload = ({ resumeFileName, resumeText }: ResumeUploadProps) 
         >
           <UploadCloud className="h-8 w-8 text-primary-500" />
           <p className="text-sm font-medium text-zinc-900">
-            {pending
-              ? 'Reading your resume…'
-              : resumeFileName
-                ? 'Click or drag to replace your resume'
-                : 'Click or drag your PDF resume here'}
+            {pending ? 'Reading your resume…' : resumeFileName ? 'Click or drag to replace your resume' : 'Click or drag your PDF resume here'}
           </p>
           <p className="text-xs text-zinc-400">PDF files up to 8MB</p>
         </div>
