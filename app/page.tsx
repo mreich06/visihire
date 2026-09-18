@@ -19,6 +19,7 @@ const FEATURES = [
         Feeds straight into your ATS score and outreach
       </strong>,
     ],
+    buttonText: 'Start tracking',
   },
   {
     title: 'ATS Scoring & Resumé Feedback',
@@ -30,6 +31,7 @@ const FEATURES = [
       'See exactly what to change to match the role',
       'Copy the feedback into your resume',
     ],
+    buttonText: 'Get your ATS score',
   },
   {
     title: 'Personalized Outreach',
@@ -42,6 +44,7 @@ const FEATURES = [
       </span>,
       'Drafted from the role and your background',
     ],
+    buttonText: 'Start outreach',
   },
 ];
 
@@ -113,9 +116,9 @@ const Home = () => {
           <div className="grid gap-6 sm:grid-cols-3">
             {FEATURES.map((feature, i) => (
               <FadeIn key={feature.title} delay={0.1 * i}>
-                <Card className="h-full p-6">
+                <Card className="flex h-full flex-col p-6">
                   <h3 className="text-lg font-semibold text-zinc-900">{feature.title}</h3>
-                  <ul className="mt-3 flex flex-col gap-2">
+                  <ul className="mt-3 flex flex-col gap-2 mb-7">
                     {feature.bullets.map((bullet, i) => (
                       <li key={i} className="flex items-start gap-2.5 text-sm text-zinc-700 pt-1">
                         <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-100">
@@ -125,6 +128,9 @@ const Home = () => {
                       </li>
                     ))}
                   </ul>
+                  <Button variant="tertiary" className="mt-auto w-full">
+                    {feature.buttonText}
+                  </Button>
                 </Card>
               </FadeIn>
             ))}

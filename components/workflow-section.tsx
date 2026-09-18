@@ -61,7 +61,7 @@ const WorkflowSection = () => {
       </div>
 
       <div ref={containerRef} className="relative h-[300vh]">
-        <div className="sticky top-0 flex h-screen items-center">
+        <div className="sticky top-0 flex h-screen items-start">
           <div className="grid w-full gap-10 lg:grid-cols-2 lg:gap-16">
             <div className="flex flex-col gap-6">
               {STEPS.map((step, i) => (
@@ -77,7 +77,7 @@ const WorkflowSection = () => {
               ))}
             </div>
 
-            <div className="relative hidden h-105 overflow-hidden rounded-2xl lg:block">
+            <div className="relative hidden h-full overflow-hidden rounded-2xl lg:block">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={active}
