@@ -5,6 +5,8 @@ import { useState } from 'react';
 
 import { moveJob } from '@/app/actions/jobs';
 import JobCard from '@/components/job-card';
+import { Button } from '@/components/ui/button';
+import { FadeIn } from '@/components/ui/fade-in';
 import type { Job, JobStatus } from '@/generated/prisma/client';
 import Modal from '../ui/modal';
 import JobForm from '../job-form';
@@ -64,52 +66,64 @@ const Board = ({ jobs }: BoardProps) => {
   return (
     <DragDropContext onDragEnd={handleDrop}>
       <div>
-        <div className="flex justify-between">
-          <h1 className="mb-6 text-xl font-semibold">Application Board</h1>
-          <button
-            className="mb-6 text-base font-semibold bg-white rounded border border-gray-200 px-2 py-1"
+        <div className="flex items-center justify-between">
+          <h1 className="mb-6 text-xl font-semibold text-zinc-900">Application Board</h1>
+          <Button
+            size="sm"
             onClick={() => {
               setSelectedJob(null);
               setModalOpen(true);
             }}
           >
             Add job
-          </button>
+          </Button>
         </div>
 
         <div className="flex gap-4 pb-4">
-          {COLUMNS.map(({ status, label }) => (
-            <Droppable droppableId={status} key={status}>
-              {(provided) => (
-                <section className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-50 p-3">
-                  <div className="mb-3 flex items-center justify-between px-1">
-                    <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-600">{label}</h2>
-                    <span className="rounded-full border border-gray-200 bg-white px-1.5 text-xs text-gray-400 tabular-nums">
-                      {board[status].length}
-                    </span>
-                  </div>
+          {COLUMNS.map(({ status, label }, i) => (
+            <FadeIn key={status} delay={0.05 * i} className="min-w-0 flex-1">
+              <Droppable droppableId={status}>
+                {(provided) => (
+                  <section className="min-w-0 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
+                    <div className="mb-3 flex items-center justify-between px-1">
+                      <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-600">
+                        {label}
+                      </h2>
+                      <span className="rounded-full border border-zinc-200 bg-white px-1.5 text-xs text-zinc-400 tabular-nums">
+                        {board[status].length}
+                      </span>
+                    </div>
 
-                  <div ref={provided.innerRef} {...provided.droppableProps} className="flex min-h-2 flex-col gap-2">
-                    {board[status].map((job, index) => (
-                      <Draggable draggableId={job.id} index={index} key={job.id}>
-                        {(dragProvided) => (
-                          <div ref={dragProvided.innerRef} {...dragProvided.draggableProps} {...dragProvided.dragHandleProps}>
-                            <JobCard
-                              job={job}
-                              onClick={() => {
-                                setModalOpen(true);
-                                setSelectedJob(job);
-                              }}
-                            />
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                </section>
-              )}
-            </Droppable>
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="flex min-h-2 flex-col gap-2"
+                    >
+                      {board[status].map((job, index) => (
+                        <Draggable draggableId={job.id} index={index} key={job.id}>
+                          {(dragProvided) => (
+                            <div
+                              ref={dragProvided.innerRef}
+                              {...dragProvided.draggableProps}
+                              {...dragProvided.dragHandleProps}
+                            >
+                              <JobCard
+                                job={job}
+                                onClick={() => {
+                                  setModalOpen(true);
+                                  setSelectedJob(job);
+                                }}
+                              />
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  </section>
+                )}
+              </Droppable>
+            </FadeIn>
           ))}
         </div>
       </div>
