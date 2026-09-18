@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   --background: #fafafa;
@@ -40,6 +40,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+  overflow-x: hidden;
 }
 
 /* Baseline gutter for page content. Deliberately scoped to `main`, not
@@ -62,7 +63,7 @@ main {
 
 .aura-bg::before,
 .aura-bg::after {
-  content: "";
+  content: '';
   position: absolute;
   width: 42rem;
   height: 42rem;
@@ -80,5 +81,40 @@ main {
 .aura-bg::after {
   top: -10rem;
   right: -12rem;
+  background: radial-gradient(circle, #fda4af, transparent 70%);
+}
+
+.aura-bg-bleed {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 100vw;
+  height: 100%;
+  transform: translateX(-50%);
+  z-index: -10;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.aura-bg-bleed::before,
+.aura-bg-bleed::after {
+  content: '';
+  position: absolute;
+  width: 42rem;
+  height: 42rem;
+  border-radius: 9999px;
+  filter: blur(110px);
+  opacity: 0.4;
+}
+
+.aura-bg-bleed::before {
+  top: -14rem;
+  left: 10%;
+  background: radial-gradient(circle, var(--color-primary-300), transparent 70%);
+}
+
+.aura-bg-bleed::after {
+  top: -10rem;
+  right: 10%;
   background: radial-gradient(circle, #fda4af, transparent 70%);
 }
