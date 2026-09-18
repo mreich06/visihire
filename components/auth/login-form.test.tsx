@@ -21,7 +21,7 @@ describe('LoginForm', () => {
 
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
     expect(screen.getByLabelText('Password')).toBeInTheDocument();
-    expect(screen.getByText('Account created - log in below.')).toBeInTheDocument();
+    expect(screen.getByText('Account created — log in below.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
   });
 
@@ -29,7 +29,7 @@ describe('LoginForm', () => {
     render(<LoginForm justRegistered={false} />);
 
     expect(
-      screen.queryByText('Account created - log in below.'),
+      screen.queryByText('Account created — log in below.'),
     ).not.toBeInTheDocument();
   });
 
