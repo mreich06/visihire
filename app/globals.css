@@ -22,6 +22,10 @@
   --color-primary-800: #3730a3;
   --color-primary-900: #312e81;
 
+  --color-accent-400: #fb923c;
+  --color-accent-500: #f97316;
+  --color-accent-600: #ea580c;
+
   --color-success: #059669;
   --color-success-soft: #ecfdf5;
   --color-warning: #d97706;
@@ -36,6 +40,13 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Baseline gutter for page content. Deliberately scoped to `main`, not
+   `body` - header/nav/footer stay full-bleed and are unaffected since
+   they sit outside <main> as siblings on every page. */
+main {
+  margin-inline: 1rem;
 }
 
 /* Soft blurred blobs behind hero-style sections. Put a positioned

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { FadeIn } from '@/components/ui/fade-in';
 import { Logo } from '@/components/logo';
+import WorkflowSection from '@/components/workflow-section';
 
 const FEATURES = [
   {
@@ -48,7 +49,20 @@ const Home = () => {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
-        <Logo href="/" />
+        <div className="flex items-center gap-10">
+          <Logo href="/" />
+          <nav className="hidden items-center gap-7 text-sm text-zinc-600 md:flex">
+            <Link href="/" className="transition-colors hover:text-zinc-900">
+              Product
+            </Link>
+            <a href="#workflow" className="transition-colors hover:text-zinc-900">
+              How it works
+            </a>
+            <a href="#contact" className="transition-colors hover:text-zinc-900">
+              Contact
+            </a>
+          </nav>
+        </div>
         <div className="flex items-center gap-3">
           <Link href="/login">
             <Button variant="ghost" size="sm">
@@ -90,7 +104,7 @@ const Home = () => {
           </FadeIn>
         </section>
 
-        <section className="mx-auto max-w-6xl px-6 pb-28">
+        <section id="features" className="mx-auto max-w-6xl px-6 pb-28">
           <FadeIn className="mb-12 text-center">
             <p className="text-xs font-semibold tracking-wide text-primary-600 uppercase">Core features</p>
             <h2 className="mt-2 text-3xl font-semibold text-zinc-900">Apply smarter. Build visibility. Reach the right people.</h2>
@@ -116,6 +130,8 @@ const Home = () => {
             ))}
           </div>
         </section>
+
+        <WorkflowSection />
       </main>
     </div>
   );
