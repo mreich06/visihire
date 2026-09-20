@@ -36,18 +36,20 @@
   --color-info-soft: #eff6ff;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
-  overflow-x: hidden;
-}
+@layer base {
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans), system-ui, sans-serif;
+    overflow-x: hidden;
+  }
 
-/* Baseline gutter for page content. Deliberately scoped to `main`, not
-   `body` - header/nav/footer stay full-bleed and are unaffected since
-   they sit outside <main> as siblings on every page. */
-main {
-  margin-inline: 1rem;
+  /* Baseline gutter for page content. Deliberately scoped to `main`, not
+     `body` - header/nav/footer stay full-bleed and are unaffected since
+     they sit outside <main> as siblings on every page. */
+  main {
+    margin-inline: 1rem;
+  }
 }
 
 /* Soft blurred blobs behind hero-style sections. Put a positioned

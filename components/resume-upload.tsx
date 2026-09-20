@@ -9,11 +9,12 @@ import { cn } from '@/lib/cn';
 interface ResumeUploadProps {
   resumeFileName: string | null;
   resumeText: string | null;
+  withFile?: boolean;
 }
 
 const initialState: FormState = { error: null };
 
-export const ResumeUpload = ({ resumeFileName, resumeText }: ResumeUploadProps) => {
+export const ResumeUpload = ({ resumeFileName, resumeText, withFile = true }: ResumeUploadProps) => {
   const [state, formAction, pending] = useActionState(uploadResume, initialState);
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -33,7 +34,7 @@ export const ResumeUpload = ({ resumeFileName, resumeText }: ResumeUploadProps) 
 
   return (
     <div className="flex flex-col gap-6">
-      {resumeFileName && (
+      {withFile && resumeFileName && (
         <div className="flex items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
           <FileText className="mt-0.5 h-5 w-5 shrink-0 text-primary-600" />
           <div className="min-w-0">
