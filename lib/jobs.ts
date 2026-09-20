@@ -1,6 +1,10 @@
 import { JobStatus } from '@/generated/prisma/enums';
 import { db } from './db';
 
+export const getJobs = async (userId: string) => {
+  return db.job.findMany({ where: { userId }, orderBy: { createdAt: 'desc' } });
+};
+
 export const getBoardJobs = async (userId: string) => {
   // return in ascending  so cards come back in column order
 

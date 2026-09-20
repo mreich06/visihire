@@ -1,16 +1,18 @@
 import { Briefcase, FileText } from 'lucide-react';
 
 import { ResumeSourceTabs } from '@/components/resume-source-tabs';
+import { TargetJobPanel } from '@/components/resume-checker/target-job-panel';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input, Textarea } from '@/components/ui/input';
 import { requireUser } from '@/lib/auth-guard';
+import { getJobs } from '@/lib/jobs';
 import { getResumes } from '@/lib/resumes';
 
 const Page = async () => {
   const user = await requireUser();
   const resumes = await getResumes(user.id);
+  const jobs = await getJobs(user.id);
 
   return (
     <div className="flex flex-col items-center gap-2 text-center">
@@ -35,8 +37,7 @@ const Page = async () => {
               <p className="text-sm font-semibold text-zinc-900">Target job</p>
               <Badge>Optional</Badge>
             </div>
-            <Input className="mb-3" name="jobTitle" type="text" placeholder="Target job title" />
-            <Textarea name="jobDescription" placeholder="Job description" className="min-h-32" />
+            <TargetJobPanel jobs={jobs} />
           </div>
         </div>
 
