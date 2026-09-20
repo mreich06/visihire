@@ -1,7 +1,7 @@
 'use client';
 
-import { FileText, UploadCloud } from 'lucide-react';
-import { useActionState, useRef, useState, type DragEvent } from 'react';
+import { AlertCircle, FileText, UploadCloud } from 'lucide-react';
+import { useActionState, useEffect, useRef, useState, type DragEvent } from 'react';
 
 import { uploadResume, type FormState } from '@/app/actions/profile';
 import { cn } from '@/lib/cn';
@@ -12,25 +12,52 @@ interface ResumeUploadProps {
   withFile?: boolean;
 }
 
+type PendingFile = { name: string; size: number };
+
 const initialState: FormState = { error: null };
+
+const formatFileSize = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 
 export const ResumeUpload = ({ resumeFileName, resumeText, withFile = true }: ResumeUploadProps) => {
   const [state, formAction, pending] = useActionState(uploadResume, initialState);
   const [dragging, setDragging] = useState(false);
+  const [pendingFile, setPendingFile] = useState<PendingFile | null>(null);
+  const [justUploaded, setJustUploaded] = useState<PendingFile | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const wasPending = useRef(false);
+
+  // React resets the <form> once the action settles, which clears
+  // inputRef.current.files before we'd get a chance to read it here - so
+  // capture the file's name/size at selection time (see submitFile) instead
+  // of trying to re-read it off the input after the fact.
+  useEffect(() => {
+    if (wasPending.current && !pending) {
+      if (!state.error && pendingFile) setJustUploaded(pendingFile);
+      setPendingFile(null);
+    }
+    wasPending.current = pending;
+  }, [pending, state.error, pendingFile]);
+
+  const submitFile = (file: File) => {
+    setJustUploaded(null);
+    setPendingFile({ name: file.name, size: file.size });
+    formRef.current?.requestSubmit();
+  };
 
   const handleDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setDragging(false);
     const file = event.dataTransfer.files[0];
-    if (!file || !inputRef.current || !formRef.current) return;
+    if (!file || !inputRef.current) return;
 
     const transfer = new DataTransfer();
     transfer.items.add(file);
     inputRef.current.files = transfer.files;
-    formRef.current.requestSubmit();
+    submitFile(file);
   };
+
+  const status = pending ? 'pending' : state.error ? 'error' : justUploaded ? 'success' : 'idle';
 
   return (
     <div className="flex flex-col gap-6">
@@ -52,7 +79,10 @@ export const ResumeUpload = ({ resumeFileName, resumeText, withFile = true }: Re
           accept="application/pdf"
           aria-label="Upload resume"
           className="hidden"
-          onChange={() => formRef.current?.requestSubmit()}
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            if (file) submitFile(file);
+          }}
         />
         <div
           role="button"
@@ -69,22 +99,40 @@ export const ResumeUpload = ({ resumeFileName, resumeText, withFile = true }: Re
           onDrop={handleDrop}
           className={cn(
             'flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed p-10 text-center transition-colors',
-            dragging ? 'border-primary-400 bg-primary-50' : 'border-zinc-200 hover:border-zinc-300',
+            status === 'success' && 'border-success/40 bg-success-soft',
+            status === 'error' && 'border-danger/40 bg-danger-soft',
+            status === 'idle' && (dragging ? 'border-primary-400 bg-primary-50' : 'border-zinc-200 hover:border-zinc-300'),
+            status === 'pending' && 'border-zinc-200',
           )}
         >
-          <UploadCloud className="h-8 w-8 text-primary-500" />
-          <p className="text-sm font-medium text-zinc-900">
-            {pending ? 'Reading your resume…' : resumeFileName ? 'Click or drag to replace your resume' : 'Click or drag your PDF resume here'}
-          </p>
-          <p className="text-xs text-zinc-400">PDF files up to 8MB</p>
+          {status === 'error' ? (
+            <AlertCircle className="h-8 w-8 text-danger" />
+          ) : (
+            <UploadCloud
+              className={cn('h-8 w-8', status === 'success' ? 'text-success' : 'text-primary-500')}
+            />
+          )}
+
+          {status === 'success' && justUploaded ? (
+            <>
+              <p className="text-sm font-semibold text-zinc-900">{justUploaded.name}</p>
+              <p className="text-xs text-zinc-500">{formatFileSize(justUploaded.size)} PDF, Uploaded successfully</p>
+            </>
+          ) : status === 'error' ? (
+            <>
+              <p className="text-sm font-semibold text-zinc-900">{state.error}</p>
+              <p className="text-xs text-zinc-500">Try uploading again</p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-medium text-zinc-900">
+                {pending ? 'Reading your resume…' : resumeFileName ? 'Click or drag to replace your resume' : 'Click or drag your PDF resume here'}
+              </p>
+              <p className="text-xs text-zinc-400">PDF files up to 8MB</p>
+            </>
+          )}
         </div>
       </form>
-
-      {state.error && (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      )}
     </div>
   );
 };
