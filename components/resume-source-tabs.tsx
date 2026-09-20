@@ -48,8 +48,15 @@ export const ResumeSourceTabs = ({ resumes }: ResumeSourceTabsProps) => {
         ) : resumes.length > 0 ? (
           <Dropdown label={selected ? selected.title : 'Choose a saved resume'}>
             {resumes.map((resume) => (
-              <DropdownItem key={resume.id} onClick={() => setSelected(resume)}>
-                {resume.title}
+              <DropdownItem
+                key={resume.id}
+                onClick={() => setSelected(resume)}
+                className="justify-between"
+              >
+                <span className="truncate">{resume.title}</span>
+                <span className="shrink-0 text-xs text-zinc-400">
+                  {resume.updatedAt.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                </span>
               </DropdownItem>
             ))}
           </Dropdown>

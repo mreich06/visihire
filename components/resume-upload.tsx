@@ -1,7 +1,7 @@
 'use client';
 
 import { AlertCircle, FileText, UploadCloud } from 'lucide-react';
-import { useActionState, useEffect, useRef, useState, type DragEvent } from 'react';
+import { useActionState, useRef, useState, type DragEvent } from 'react';
 
 import { uploadResume, type FormState } from '@/app/actions/profile';
 import { cn } from '@/lib/cn';
@@ -23,21 +23,23 @@ export const ResumeUpload = ({ resumeFileName, resumeText, withFile = true }: Re
   const [dragging, setDragging] = useState(false);
   const [pendingFile, setPendingFile] = useState<PendingFile | null>(null);
   const [justUploaded, setJustUploaded] = useState<PendingFile | null>(null);
+  const [prevPending, setPrevPending] = useState(pending);
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const wasPending = useRef(false);
 
   // React resets the <form> once the action settles, which clears
   // inputRef.current.files before we'd get a chance to read it here - so
   // capture the file's name/size at selection time (see submitFile) instead
-  // of trying to re-read it off the input after the fact.
-  useEffect(() => {
-    if (wasPending.current && !pending) {
+  // of trying to re-read it off the input after the fact. Comparing against
+  // prevPending during render (not in an effect) is React's recommended
+  // pattern for reacting to a value change without an extra render pass.
+  if (pending !== prevPending) {
+    setPrevPending(pending);
+    if (prevPending && !pending) {
       if (!state.error && pendingFile) setJustUploaded(pendingFile);
       setPendingFile(null);
     }
-    wasPending.current = pending;
-  }, [pending, state.error, pendingFile]);
+  }
 
   const submitFile = (file: File) => {
     setJustUploaded(null);

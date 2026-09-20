@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { requireUser } from '@/lib/auth-guard';
 import { getJobs } from '@/lib/jobs';
 import { getResumes } from '@/lib/resumes';
+import CheckerDescription from '@/components/resume-checker/checker-description';
 
 const Page = async () => {
   const user = await requireUser();
@@ -45,6 +46,7 @@ const Page = async () => {
           <Button type="submit">Get my ATS score</Button>
         </div>
       </Card>
+      <CheckerDescription />
     </div>
   );
 };
