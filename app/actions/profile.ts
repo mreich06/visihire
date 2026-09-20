@@ -10,10 +10,7 @@ export type FormState = { error: string | null };
 
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 
-export const uploadResume = async (
-  prevState: FormState,
-  formData: FormData,
-): Promise<FormState> => {
+export const uploadResume = async (prevState: FormState, formData: FormData): Promise<FormState> => {
   const user = await requireUser();
   const file = formData.get('resume');
 
@@ -36,12 +33,13 @@ export const uploadResume = async (
     return { error: "Couldn't read any text from that PDF. Try a different file." };
   }
 
-  await db.profile.upsert({
-    where: { userId: user.id },
-    update: { resumeText, resumeFileName: file.name },
-    create: { userId: user.id, resumeText, resumeFileName: file.name },
+  const title = file.name.replace(/\.pdf$/i, '');
+
+  await db.resume.create({
+    data: { userId: user.id, title, text: resumeText, resumeFileName: file.name },
   });
 
   revalidatePath('/profile');
+  revalidatePath('/resume-checker');
   return { error: null };
 };

@@ -4,11 +4,12 @@ import { FileText, Upload } from 'lucide-react';
 import { useState } from 'react';
 
 import { ResumeUpload } from '@/components/resume-upload';
+import { Dropdown, DropdownItem } from '@/components/ui/dropdown';
 import { cn } from '@/lib/cn';
+import type { Resume } from '@/generated/prisma/client';
 
 interface ResumeSourceTabsProps {
-  resumeFileName: string | null;
-  resumeText: string | null;
+  resumes: Resume[];
 }
 
 type Tab = 'upload' | 'saved';
@@ -18,8 +19,9 @@ const TABS: { id: Tab; label: string; icon: typeof Upload }[] = [
   { id: 'saved', label: 'Use a saved resume', icon: FileText },
 ];
 
-export const ResumeSourceTabs = ({ resumeFileName, resumeText }: ResumeSourceTabsProps) => {
+export const ResumeSourceTabs = ({ resumes }: ResumeSourceTabsProps) => {
   const [tab, setTab] = useState<Tab>('upload');
+  const [selected, setSelected] = useState<Resume | null>(null);
 
   return (
     <div>
@@ -31,9 +33,7 @@ export const ResumeSourceTabs = ({ resumeFileName, resumeText }: ResumeSourceTab
             onClick={() => setTab(id)}
             className={cn(
               'flex items-center gap-1.5 border-b-2 px-1 pb-2 transition-colors',
-              tab === id
-                ? 'border-primary-600 text-primary-600'
-                : 'border-transparent text-zinc-500 hover:text-zinc-700',
+              tab === id ? 'border-primary-600 text-primary-600' : 'border-transparent text-zinc-500 hover:text-zinc-700',
             )}
           >
             <Icon className="h-4 w-4" />
@@ -44,18 +44,18 @@ export const ResumeSourceTabs = ({ resumeFileName, resumeText }: ResumeSourceTab
 
       <div className="pt-4">
         {tab === 'upload' ? (
-          <ResumeUpload resumeFileName={resumeFileName} resumeText={resumeText} withFile={false} />
-        ) : resumeFileName ? (
-          <div className="flex items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-            <FileText className="mt-0.5 h-5 w-5 shrink-0 text-primary-600" />
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-zinc-900">{resumeFileName}</p>
-              {resumeText && <p className="mt-1 line-clamp-2 text-xs text-zinc-500">{resumeText}</p>}
-            </div>
-          </div>
+          <ResumeUpload resumeFileName={null} resumeText={null} withFile={false} />
+        ) : resumes.length > 0 ? (
+          <Dropdown label={selected ? selected.title : 'Choose a saved resume'}>
+            {resumes.map((resume) => (
+              <DropdownItem key={resume.id} onClick={() => setSelected(resume)}>
+                {resume.title}
+              </DropdownItem>
+            ))}
+          </Dropdown>
         ) : (
           <p className="rounded-xl border border-dashed border-zinc-200 p-6 text-center text-sm text-zinc-500">
-            No saved resume yet. Upload one on your profile page first.
+            No saved resumes yet. Upload one to save it here.
           </p>
         )}
       </div>

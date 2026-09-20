@@ -6,18 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input, Textarea } from '@/components/ui/input';
 import { requireUser } from '@/lib/auth-guard';
-import { getProfile } from '@/lib/profile';
+import { getResumes } from '@/lib/resumes';
 
 const Page = async () => {
   const user = await requireUser();
-  const profile = await getProfile(user.id);
+  const resumes = await getResumes(user.id);
 
   return (
     <div className="flex flex-col items-center gap-2 text-center">
       <h1 className="text-xl font-semibold text-zinc-900">Resume Checker</h1>
       <p className="mb-5 max-w-2xl text-sm text-zinc-500">
-        Get a free ATS check of your resume on its own, or match it against a job posting. Paste
-        a job description in or pick from your saved jobs.
+        Get a free ATS check of your resume on its own, or match it against a job posting. Paste a job description in or pick from your saved jobs.
       </p>
 
       <Card className="w-full max-w-5xl p-6 text-left">
@@ -27,10 +26,7 @@ const Page = async () => {
               <FileText className="h-4 w-4 text-primary-600" />
               <p className="text-sm font-semibold text-zinc-900">Choose your resume</p>
             </div>
-            <ResumeSourceTabs
-              resumeFileName={profile?.resumeFileName ?? null}
-              resumeText={profile?.resumeText ?? null}
-            />
+            <ResumeSourceTabs resumes={resumes} />
           </div>
 
           <div>
