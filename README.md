@@ -20,7 +20,7 @@ VisiHire is an AI-powered job search optimization platform designed to help job 
 - [React](https://reactjs.org)
 - [Prisma](https://www.prisma.io)
 - [PostgreSQL](https://www.postgresql.org)
-- [OpenAI API](https://openai.com)
+- [Gemini API](https://gemini.google.com/)
 
 
 ## Getting Started
