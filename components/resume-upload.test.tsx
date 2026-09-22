@@ -52,4 +52,49 @@ describe('ResumeUpload', () => {
 
     expect(await screen.findByText('Only PDF files are supported.')).toBeInTheDocument();
   });
+
+  it('shows a success state when the resume is uploaded successfully', async () => {
+    uploadResumeMock.mockResolvedValue({ error: null });
+    const user = userEvent.setup();
+    render(<ResumeUpload resumeFileName={null} resumeText={null} />);
+
+    await user.upload(screen.getByLabelText('Upload resume'), makePdf());
+
+    expect(await screen.findByText(/uploaded successfully/i)).toBeInTheDocument();
+    expect(screen.getByText('resume.pdf')).toBeInTheDocument();
+  });
+
+  it('shows an error state when the upload fails', async () => {
+    uploadResumeMock.mockResolvedValue({ error: 'Only PDF files are supported.' });
+    const user = userEvent.setup();
+    render(<ResumeUpload resumeFileName={null} resumeText={null} />);
+
+    await user.upload(screen.getByLabelText('Upload resume'), makePdf());
+
+    expect(await screen.findByText('Only PDF files are supported.')).toBeInTheDocument();
+    expect(screen.getByText('Try uploading again')).toBeInTheDocument();
+  });
+
+  it('goes back to the pending state when uploading a second file after a success', async () => {
+    uploadResumeMock.mockResolvedValue({ error: null });
+    const user = userEvent.setup();
+    render(<ResumeUpload resumeFileName={null} resumeText={null} />);
+
+    await user.upload(screen.getByLabelText('Upload resume'), makePdf('first.pdf'));
+    expect(await screen.findByText(/uploaded successfully/i)).toBeInTheDocument();
+
+    let resolveSecondUpload: (value: { error: string | null }) => void = () => {};
+    uploadResumeMock.mockReturnValue(
+      new Promise((resolve) => {
+        resolveSecondUpload = resolve;
+      }),
+    );
+
+    await user.upload(screen.getByLabelText('Upload resume'), makePdf('second.pdf'));
+    expect(screen.getByText('Reading your resume…')).toBeInTheDocument();
+    expect(screen.queryByText(/uploaded successfully/i)).not.toBeInTheDocument();
+
+    resolveSecondUpload({ error: null });
+    expect(await screen.findByText('second.pdf')).toBeInTheDocument();
+  });
 });
