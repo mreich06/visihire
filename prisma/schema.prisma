@@ -26,6 +26,7 @@ model User {
   jobs     Job[]
   profile  Profile?
   resumes  Resume[]
+  audits   Audit[]
 }
 
 model Account {
@@ -83,6 +84,7 @@ model Job {
   updatedAt DateTime  @updatedAt
   appliedAt DateTime?
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  audits    Audit[]
 
   @@index([userId, status])
 }
@@ -104,6 +106,29 @@ model Resume {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  audits         Audit[]
 
+  @@index([userId])
+}
+
+// One audit per (resumeId, jobId) pair - jobId is null for a general,
+// job-less audit. Postgres does not enforce uniqueness across null values in
+// a compound unique index, so the null-jobId case is de-duplicated in
+// application code (see lib/audit.ts) rather than via db.audit.upsert.
+model Audit {
+  id        String   @id @default(cuid())
+  userId    String
+  resumeId  String
+  jobId     String?
+  score     Int
+  result    Json
+  model     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resume    Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  job       Job?     @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([resumeId, jobId])
   @@index([userId])
 }
