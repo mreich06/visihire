@@ -23,6 +23,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.122.0",
     "@auth/prisma-adapter": "^2.11.3",
+    "@google/genai": "^2.24.0",
     "@hello-pangea/dnd": "^18.0.1",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
