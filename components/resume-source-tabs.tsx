@@ -1,7 +1,7 @@
 'use client';
 
 import { FileText, Upload } from 'lucide-react';
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 
 import { ResumeUpload } from '@/components/resume-upload';
 import { Dropdown, DropdownItem } from '@/components/ui/dropdown';
@@ -10,6 +10,8 @@ import type { Resume } from '@/generated/prisma/client';
 
 interface ResumeSourceTabsProps {
   resumes: Resume[];
+  selected: Resume | null;
+  setSelected: Dispatch<SetStateAction<Resume | null>>;
 }
 
 type Tab = 'upload' | 'saved';
@@ -19,9 +21,8 @@ const TABS: { id: Tab; label: string; icon: typeof Upload }[] = [
   { id: 'saved', label: 'Use a saved resume', icon: FileText },
 ];
 
-export const ResumeSourceTabs = ({ resumes }: ResumeSourceTabsProps) => {
+export const ResumeSourceTabs = ({ resumes, selected, setSelected }: ResumeSourceTabsProps) => {
   const [tab, setTab] = useState<Tab>('upload');
-  const [selected, setSelected] = useState<Resume | null>(null);
 
   return (
     <div>
@@ -48,11 +49,7 @@ export const ResumeSourceTabs = ({ resumes }: ResumeSourceTabsProps) => {
         ) : resumes.length > 0 ? (
           <Dropdown label={selected ? selected.title : 'Choose a saved resume'}>
             {resumes.map((resume) => (
-              <DropdownItem
-                key={resume.id}
-                onClick={() => setSelected(resume)}
-                className="justify-between"
-              >
+              <DropdownItem key={resume.id} onClick={() => setSelected(resume)} className="justify-between">
                 <span className="truncate">{resume.title}</span>
                 <span className="shrink-0 text-xs text-zinc-400">
                   {resume.updatedAt.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
