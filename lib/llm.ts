@@ -1,30 +1,68 @@
 import 'server-only';
 
-import { GoogleGenAI } from '@google/genai';
+import OpenAI from 'openai';
+import type { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/chat/completions';
 import { z } from 'zod';
 
-export const GEMINI_MODEL = 'gemini-2.5-flash';
+export const LLM_MODEL = 'deepseek-flash';
 
-const client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const client = new OpenAI({
+  baseURL: 'https://api.deepseek.com',
+  apiKey: process.env.DEEPSEEK_API_KEY,
+});
 
-// Gemini LLM response
+const MAX_ATTEMPTS = 2;
+
+// DeepSeek's API only guarantees valid JSON syntax (response_format:
+// json_object), not that it matches our schema unlike Gemini's
+// responseSchema, which constrains the model to the exact shape at
+// generation time. So this validates with zod and retries once
+// It feeds the validation error back into the prompt before giving up
 export const generateStructured = async <Schema extends z.ZodType>(prompt: string, schema: Schema): Promise<z.infer<Schema>> => {
-  const response = await client.models.generateContent({
-    model: GEMINI_MODEL,
-    contents: prompt,
-    config: {
-      responseMimeType: 'application/json',
-      responseSchema: z.toJSONSchema(schema),
-    },
-  });
+  const jsonSchema = JSON.stringify(z.toJSONSchema(schema));
+  let lastError = '';
 
-  const text = response.text;
-  if (!text) throw new Error('Gemini returned an empty response.');
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const retryNote =
+      attempt > 1
+        ? `\n\nYour previous response did not match the required schema (${lastError}). Return only valid JSON matching the schema, no other text.`
+        : '';
 
-  const parsed = schema.safeParse(JSON.parse(text));
-  if (!parsed.success) {
-    throw new Error(`Gemini response did not match the expected schema: ${parsed.error.message}`);
+    const params: ChatCompletionCreateParamsNonStreaming & {
+      // DeepSeek-specific extensions - not part of the OpenAI SDK's typed parans
+      thinking?: { type: 'enabled' | 'disabled' };
+    } = {
+      model: LLM_MODEL,
+      messages: [
+        { role: 'system', content: `Respond with only valid JSON matching this schema, no other text:\n${jsonSchema}` },
+        { role: 'user', content: prompt + retryNote },
+      ],
+      response_format: { type: 'json_object' },
+      thinking: { type: 'enabled' },
+      reasoning_effort: 'high',
+    };
+
+    const completion = await client.chat.completions.create(params);
+    const text = completion.choices[0]?.message?.content;
+
+    if (!text) {
+      lastError = 'empty response';
+      continue;
+    }
+
+    let json: unknown;
+    try {
+      json = JSON.parse(text);
+    } catch {
+      lastError = 'response was not valid JSON';
+      continue;
+    }
+
+    const parsed = schema.safeParse(json);
+    if (parsed.success) return parsed.data;
+
+    lastError = parsed.error.message;
   }
 
-  return parsed.data;
+  throw new Error(`DeepSeek response did not match the expected schema after ${MAX_ATTEMPTS} attempts: ${lastError}`);
 };

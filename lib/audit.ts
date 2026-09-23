@@ -3,7 +3,7 @@ import 'server-only';
 import { z } from 'zod';
 
 import { db } from '@/lib/db';
-import { generateStructured, GEMINI_MODEL } from '@/lib/llm';
+import { generateStructured, LLM_MODEL } from '@/lib/llm';
 import { runResumeChecks, type ResumeChecks } from '@/lib/resume-checks';
 import type { Job, Prisma, Resume } from '@/generated/prisma/client';
 
@@ -219,7 +219,7 @@ export const getOrCreateAudit = async ({ userId, resumeId, jobId = null }: GetOr
     jobId,
     score,
     result: result as unknown as Prisma.InputJsonValue,
-    model: GEMINI_MODEL,
+    model: LLM_MODEL,
   };
 
   if (existing) {
