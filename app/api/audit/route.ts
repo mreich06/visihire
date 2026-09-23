@@ -24,7 +24,6 @@ export async function POST(request: Request) {
   const body = await request.json();
   const parsed = bodySchema.safeParse(body);
   if (!parsed.success) {
-    console.log('audit request failed validation', { body, issues: parsed.error.issues });
     return NextResponse.json({ error: 'Invalid request.' }, { status: 400 });
   }
 

@@ -200,12 +200,10 @@ interface GetOrCreateAuditParams {
 // changed since it was cached
 export const getOrCreateAudit = async ({ userId, resumeId, jobId = null }: GetOrCreateAuditParams) => {
   const resume = await db.resume.findUnique({ where: { id: resumeId } });
-  console.log('resume', resume);
   if (!resume || resume.userId !== userId) throw new Error('Resume not found.');
 
   const job = jobId ? await db.job.findUnique({ where: { id: jobId } }) : null;
   if (jobId && (!job || job.userId !== userId)) throw new Error('Job not found.');
-  console.log('job', job);
 
   // compare resume in the audit with the resume that is stored in resume array, update if needed
   const existing = await db.audit.findFirst({ where: { resumeId, jobId } });

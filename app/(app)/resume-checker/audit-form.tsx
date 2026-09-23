@@ -8,8 +8,10 @@ import { TargetJobPanel } from '@/components/resume-checker/target-job-panel';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Job, Resume } from '@/generated/prisma/client';
-import { LoadingModal } from '@/components/ui/loading-modal';
+import { Audit, Job, Resume } from '@/generated/prisma/client';
+import { LoadingModal, StatusType } from '@/components/ui/loading-modal';
+import AuditResults from '@/components/ui/audit-results';
+import { AuditResult } from '@/lib/audit';
 
 interface AuditFormProps {
   jobs: Job[];
@@ -19,6 +21,10 @@ const AuditForm = ({ jobs, resumes }: AuditFormProps) => {
   const [scoring, setScoring] = useState(false);
   const [selectedResume, setSelectedResume] = useState<Resume | null>(null);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [result, setResult] = useState<AuditResult | null>(null);
+  const [error, setError] = useState(false);
+
+  const status: StatusType = scoring ? 'loading' : result ? 'success' : error ? 'error' : 'idle';
 
   const handleGetScore = async () => {
     setScoring(true);
@@ -28,41 +34,57 @@ const AuditForm = ({ jobs, resumes }: AuditFormProps) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ resumeId: selectedResume?.id, jobId: selectedJob?.id }),
       });
-      const audit = await res.json();
-      console.log('audit', audit);
+      if (res.ok) {
+        const audit: AuditResult = await res.json();
+        setResult(audit);
+      } else {
+        setError(true);
+      }
     } finally {
       setScoring(false);
     }
   };
   return (
     <>
-      <Card className="w-full max-w-5xl p-6 text-left">
-        <div className="grid grid-cols-2 gap-8">
-          <div>
-            <div className="mb-3 flex items-center gap-2">
-              <FileText className="h-4 w-4 text-primary-600" />
-              <p className="text-sm font-semibold text-zinc-900">Choose your resume</p>
+      {!result ? (
+        <div className="w-100 bg-white">
+          <AuditResults audit={result} />
+        </div>
+      ) : (
+        <Card className="w-full max-w-5xl p-6 text-left">
+          <div className="grid grid-cols-2 gap-8">
+            <div>
+              <div className="mb-3 flex items-center gap-2">
+                <FileText className="h-4 w-4 text-primary-600" />
+                <p className="text-sm font-semibold text-zinc-900">Choose your resume</p>
+              </div>
+              <ResumeSourceTabs resumes={resumes} selected={selectedResume} setSelected={setSelectedResume} />
             </div>
-            <ResumeSourceTabs resumes={resumes} selected={selectedResume} setSelected={setSelectedResume} />
+
+            <div>
+              <div className="mb-3 flex items-center gap-2">
+                <Briefcase className="h-4 w-4 text-primary-600" />
+                <p className="text-sm font-semibold text-zinc-900">Target job</p>
+                <Badge>Optional</Badge>
+              </div>
+              <TargetJobPanel jobs={jobs} selected={selectedJob} setSelected={setSelectedJob} />
+            </div>
           </div>
 
-          <div>
-            <div className="mb-3 flex items-center gap-2">
-              <Briefcase className="h-4 w-4 text-primary-600" />
-              <p className="text-sm font-semibold text-zinc-900">Target job</p>
-              <Badge>Optional</Badge>
-            </div>
-            <TargetJobPanel jobs={jobs} selected={selectedJob} setSelected={setSelectedJob} />
+          <div className="mt-6 flex justify-end">
+            <Button type="submit" onClick={() => handleGetScore()}>
+              Get my ATS score
+            </Button>
           </div>
-        </div>
+        </Card>
+      )}
 
-        <div className="mt-6 flex justify-end">
-          <Button type="submit" onClick={() => handleGetScore()}>
-            Get my ATS score
-          </Button>
-        </div>
-      </Card>
-      <LoadingModal open={scoring} />
+      <LoadingModal
+        open={scoring}
+        status={status}
+        title={status === 'error' ? 'Your resumé could not be evaluated' : undefined}
+        description={status === 'error' ? 'Please try again.' : undefined}
+      />
     </>
   );
 };

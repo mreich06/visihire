@@ -2,14 +2,17 @@
 
 import { AnimatePresence, motion } from 'motion/react';
 
+export type StatusType = 'loading' | 'success' | 'error' | 'idle';
 interface LoadingModalProps {
   open: boolean;
+  status: StatusType;
   title?: string;
   description?: string;
 }
 
 export const LoadingModal = ({
   open,
+  status,
   title = 'Scoring your resume…',
   description = 'This usually takes a few seconds.',
 }: LoadingModalProps) => (
@@ -32,13 +35,15 @@ export const LoadingModal = ({
           <p className="text-sm font-semibold text-zinc-900">{title}</p>
           <p className="mt-1 text-xs text-zinc-500">{description}</p>
 
-          <div className="mt-5 h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
-            <motion.div
-              className="h-full w-1/3 rounded-full bg-primary-500"
-              animate={{ x: ['-100%', '250%'] }}
-              transition={{ duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
-            />
-          </div>
+          {status === 'loading' && (
+            <div className="mt-5 h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
+              <motion.div
+                className="h-full w-1/3 rounded-full bg-primary-500"
+                animate={{ x: ['-100%', '250%'] }}
+                transition={{ duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
+              />
+            </div>
+          )}
         </motion.div>
       </motion.div>
     )}
