@@ -46,10 +46,8 @@ const AuditForm = ({ jobs, resumes }: AuditFormProps) => {
   };
   return (
     <>
-      {!result ? (
-        <div className="w-100 bg-white">
-          <AuditResults audit={result} />
-        </div>
+      {result ? (
+        <AuditResults audit={result} />
       ) : (
         <Card className="w-full max-w-5xl p-6 text-left">
           <div className="grid grid-cols-2 gap-8">

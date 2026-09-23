@@ -22,7 +22,7 @@ const AuditResults = ({ audit }: AuditResultsProps) => {
 
   // create ui for audit
   return (
-    <div className="flex w-full gap-6">
+    <div className="flex w-full max-w-5xl gap-6">
       <SideMenu
         menuItems={AUDIT_MENU_ITEMS}
         selectedId={selectedId}
