@@ -45,7 +45,7 @@ export const ResumeSourceTabs = ({ resumes, selected, setSelected }: ResumeSourc
 
       <div className="pt-4">
         {tab === 'upload' ? (
-          <ResumeUpload resumeFileName={null} resumeText={null} withFile={false} />
+          <ResumeUpload resumeFileName={null} resumeText={null} withFile={false} onUploaded={setSelected} />
         ) : resumes.length > 0 ? (
           <Dropdown label={selected ? selected.title : 'Choose a saved resume'}>
             {resumes.map((resume) => (
