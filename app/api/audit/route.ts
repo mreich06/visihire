@@ -21,9 +21,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'You need to be logged in.' }, { status: 401 });
   }
 
-  const parsed = bodySchema.safeParse(await request.json());
+  const body = await request.json();
+  const parsed = bodySchema.safeParse(body);
   if (!parsed.success) {
-    console.log('here', bodySchema);
+    console.log('audit request failed validation', { body, issues: parsed.error.issues });
     return NextResponse.json({ error: 'Invalid request.' }, { status: 400 });
   }
 
