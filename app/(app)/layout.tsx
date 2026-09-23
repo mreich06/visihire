@@ -1,34 +1,28 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { AppSidebar } from '@/components/app-sidebar';
 import { Logo } from '@/components/logo';
-import { NavLinks } from '@/components/nav-links';
 import { requireUser } from '@/lib/auth-guard';
 
 const Layout = async ({ children }: { children: ReactNode }) => {
   const user = await requireUser();
 
   return (
-    <div className="min-h-screen">
-      <header className="sticky top-0 z-50 border-b border-zinc-200/70 bg-background/80 backdrop-blur-md">
-        <nav className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4 md:px-6">
-          <div className="flex items-center gap-8">
-            <Logo />
-            <NavLinks />
-          </div>
+    <div className="flex min-h-screen flex-col bg-white p-4">
+      <header className="flex h-14 shrink-0 items-center justify-between rounded-xl bg-zinc-50 px-4">
+        <Logo />
 
-          <div className="flex items-center gap-4 text-sm">
-            <Link
-              href="/profile"
-              className="text-zinc-500 transition-colors hover:text-zinc-900"
-            >
-              {user.email}
-            </Link>
-          </div>
-        </nav>
+        <Link href="/profile" className="text-sm text-zinc-500 transition-colors hover:text-zinc-900">
+          {user.email}
+        </Link>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl px-4 py-8 md:px-6">{children}</main>
+      <div className="flex min-h-0 flex-1 gap-4 pt-4">
+        <AppSidebar />
+
+        <main className="min-w-0 flex-1">{children}</main>
+      </div>
     </div>
   );
 };

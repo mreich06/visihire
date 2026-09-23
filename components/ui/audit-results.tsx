@@ -23,13 +23,7 @@ const AuditResults = ({ audit }: AuditResultsProps) => {
   // create ui for audit
   return (
     <div className="flex w-full max-w-5xl gap-6">
-      <SideMenu
-        menuItems={AUDIT_MENU_ITEMS}
-        selectedId={selectedId}
-        onSelect={setSelectedId}
-        className="hidden shrink-0 sm:flex sm:w-20 sm:flex-col md:w-64"
-      />
-      <ResultsDashboard className="min-w-0 flex-1" />
+      <ResultsDashboard className="min-w-0 flex-1" result={audit} />
     </div>
   );
 };
