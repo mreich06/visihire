@@ -2,18 +2,28 @@ import type { HTMLAttributes } from 'react';
 
 import { cn } from '@/lib/cn';
 import type { AuditResult } from '@/lib/audit';
-import { ScoreSummaryCard, type ScoreCategory } from './score-summary-card';
+import { ScoreSummaryCard, type ScoreCategory, type TriageCounts } from './score-summary-card';
 
 interface ResultsDashboardProps extends HTMLAttributes<HTMLDivElement> {
   result: AuditResult;
+  onCheckAnother: () => void;
+  onSaveToJob?: () => void;
 }
 
 const gradeLabel = (score: number) => (score >= 80 ? 'Excellent' : score >= 60 ? 'Good' : 'Needs Work');
 
+const structuralChecks = (checks: AuditResult['checks']) => [
+  checks.hasEmail,
+  checks.hasPhone,
+  checks.hasEducationSection,
+  checks.hasExperienceSection,
+  checks.hasDateRange,
+];
+
 const buildCategories = (result: AuditResult): ScoreCategory[] => {
   const { checks, matchedKeywords, missingKeywords, sectionFeedback } = result;
 
-  const searchabilityChecks = [checks.hasEmail, checks.hasPhone, checks.hasEducationSection, checks.hasExperienceSection, checks.hasDateRange];
+  const searchabilityChecks = structuralChecks(checks);
   const searchabilityIssues = searchabilityChecks.filter((passed) => !passed).length;
 
   const quantifiedRatio = checks.totalLineCount === 0 ? 0 : checks.quantifiedLineCount / checks.totalLineCount;
@@ -51,10 +61,29 @@ const buildCategories = (result: AuditResult): ScoreCategory[] => {
   ];
 };
 
-const ResultsDashboard = ({ className, result, ...props }: ResultsDashboardProps) => {
+const buildTriage = (result: AuditResult): TriageCounts => {
+  const { checks, matchedKeywords, sectionFeedback } = result;
+  const checksList = structuralChecks(checks);
+
+  return {
+    critical: checksList.filter((passed) => !passed).length,
+    improvements: sectionFeedback.length,
+    strengths: checksList.filter(Boolean).length + matchedKeywords.filter((k) => k.contextFound === 'Strong').length,
+  };
+};
+
+const ResultsDashboard = ({ className, result, onCheckAnother, onSaveToJob, ...props }: ResultsDashboardProps) => {
   return (
     <div className={cn('flex flex-col gap-4 rounded-xl bg-zinc-50 p-4', className)} {...props}>
-      <ScoreSummaryCard score={result.score} grade={gradeLabel(result.score)} summary={result.summary} categories={buildCategories(result)} />
+      <ScoreSummaryCard
+        score={result.score}
+        grade={gradeLabel(result.score)}
+        summary={result.summary}
+        categories={buildCategories(result)}
+        triage={buildTriage(result)}
+        onCheckAnother={onCheckAnother}
+        onSaveToJob={onSaveToJob}
+      />
     </div>
   );
 };

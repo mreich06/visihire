@@ -53,7 +53,20 @@ const AuditForm = ({ jobs, resumes }: AuditFormProps) => {
   return (
     <>
       {result ? (
-        <AuditResults audit={result} />
+        <AuditResults
+          audit={result}
+          onCheckAnother={() => setResult(null)}
+          onSaveToJob={
+            selectedJob
+              ? () => {
+                  // TODO: no backend yet for saving an audit to a job's
+                  // records (cover letters/messages live there too) - wire
+                  // this up once that model exists.
+                  console.log('save audit to job', selectedJob.id);
+                }
+              : undefined
+          }
+        />
       ) : (
         <Card className="w-full max-w-5xl p-6 text-left">
           <div className="grid grid-cols-2 gap-8">
