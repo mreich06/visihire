@@ -3,8 +3,8 @@ import type { ButtonHTMLAttributes } from 'react';
 
 import { cn } from '@/lib/cn';
 
-type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'outline' | 'ghost' | 'danger';
-type ButtonSize = 'sm' | 'md';
+export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'outline' | 'ghost' | 'danger';
+export type ButtonSize = 'sm' | 'md';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -25,17 +25,16 @@ const sizeClasses: Record<ButtonSize, string> = {
   md: 'px-4 py-2 text-sm',
 };
 
+export const buttonClasses = (variant: ButtonVariant = 'primary', size: ButtonSize = 'md', className?: string) =>
+  cn(
+    'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors disabled:cursor-not-allowed',
+    variantClasses[variant],
+    sizeClasses[size],
+    className,
+  );
+
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({ variant = 'primary', size = 'md', className, ...props }, ref) => (
-  <button
-    ref={ref}
-    className={cn(
-      'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors disabled:cursor-not-allowed',
-      variantClasses[variant],
-      sizeClasses[size],
-      className,
-    )}
-    {...props}
-  />
+  <button ref={ref} className={buttonClasses(variant, size, className)} {...props} />
 ));
 
 Button.displayName = 'Button';

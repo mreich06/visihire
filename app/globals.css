@@ -86,6 +86,14 @@
   background: radial-gradient(circle, #fda4af, transparent 70%);
 }
 
+/* A smooth purple gradient wash for promo-style cards - plain background
+   paint, not a positioned/z-indexed decoration, so there's no stacking
+   context to get wrong (unlike .aura-bg, this can't render behind an
+   ancestor by accident). Put it directly on the card's own className. */
+.aura-glow-card {
+  background: radial-gradient(90% 90% at 50% 40%, #ffffff 0%, var(--color-primary-100) 100%);
+}
+
 .aura-bg-bleed {
   position: absolute;
   top: 0;

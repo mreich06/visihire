@@ -12,6 +12,7 @@ import { Audit, Job, Resume } from '@/generated/prisma/client';
 import { LoadingModal, StatusType } from '@/components/ui/loading-modal';
 import AuditResults from '@/components/ui/audit-results';
 import CheckerDescription from '@/components/resume-checker/checker-description';
+import OutreachCta from '@/components/resume-checker/outreach-cta';
 import { AuditResult } from '@/lib/audit';
 
 // /api/audit returns the raw Prisma Audit row: score sits at the top
@@ -115,6 +116,8 @@ const AuditForm = ({ jobs, resumes }: AuditFormProps) => {
       )}
 
       {!result && <CheckerDescription />}
+
+      <OutreachCta />
 
       <LoadingModal
         open={scoring}
