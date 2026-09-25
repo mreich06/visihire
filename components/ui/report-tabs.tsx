@@ -2,7 +2,7 @@
 
 import { AlertCircle, AlertTriangle, Info } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useState } from 'react';
+import { useEffect } from 'react';
 
 import { cn } from '@/lib/cn';
 import type { AuditResult } from '@/lib/audit';
@@ -24,14 +24,23 @@ const severityConfig: Record<SectionFeedbackItem['severity'], { icon: typeof Ale
   Minor: { icon: Info, color: 'text-primary-500' },
 };
 
+export type TabId = 'breakdown' | 'suggestions' | 'keywords' | 'rewrites';
+
+// A fresh object each time so the scroll effect below always re-fires
+export interface CategoryScrollRequest {
+  label: string;
+  token: number;
+}
+
 interface ReportTabsProps {
   categories: ScoreCategory[];
   sectionFeedback: AuditResult['sectionFeedback'];
   missingKeywords: AuditResult['missingKeywords'];
   rewriteSuggestions: AuditResult['rewriteSuggestions'];
+  active: TabId;
+  onActiveChange: (id: TabId) => void;
+  scrollRequest: CategoryScrollRequest | null;
 }
-
-type TabId = 'breakdown' | 'suggestions' | 'keywords' | 'rewrites';
 
 const TABS: { id: TabId; label: string }[] = [
   { id: 'breakdown', label: 'Score breakdown' },
@@ -40,8 +49,19 @@ const TABS: { id: TabId; label: string }[] = [
   { id: 'rewrites', label: 'Rewrites' },
 ];
 
-export const ReportTabs = ({ categories, sectionFeedback, missingKeywords, rewriteSuggestions }: ReportTabsProps) => {
-  const [active, setActive] = useState<TabId>('breakdown');
+export const ReportTabs = ({
+  categories,
+  sectionFeedback,
+  missingKeywords,
+  rewriteSuggestions,
+  active,
+  onActiveChange,
+  scrollRequest,
+}: ReportTabsProps) => {
+  useEffect(() => {
+    if (active !== 'breakdown' || !scrollRequest) return;
+    document.getElementById(`category-${scrollRequest.label}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [active, scrollRequest]);
 
   return (
     <div className="rounded-xl bg-white p-4 shadow-sm">
@@ -52,7 +72,7 @@ export const ReportTabs = ({ categories, sectionFeedback, missingKeywords, rewri
           <button
             key={id}
             type="button"
-            onClick={() => setActive(id)}
+            onClick={() => onActiveChange(id)}
             className={cn(
               'relative flex-1 rounded-full px-4 py-2 text-sm font-medium transition-colors',
               active === id ? 'text-zinc-900' : 'text-zinc-500 hover:text-zinc-700',
@@ -77,7 +97,11 @@ export const ReportTabs = ({ categories, sectionFeedback, missingKeywords, rewri
               const fixes = sectionFeedback.filter((item) => item.category === category.label);
 
               return (
-                <div key={category.label} className="border-b border-zinc-100 pb-6 last:border-0 last:pb-0">
+                <div
+                  key={category.label}
+                  id={`category-${category.label}`}
+                  className="scroll-mt-4 border-b border-zinc-100 pb-6 last:border-0 last:pb-0"
+                >
                   <h3 className="text-lg font-bold text-primary-600">{category.label}</h3>
 
                   {fixes.length > 0 ? (

@@ -126,7 +126,7 @@ If a job was given:
 3. For terms with an occurrence count of 0, add them to "missingKeywords" with an "importance" (High/Medium/Low - how central this term is to THIS job's requirements) and a one-sentence "reason" grounded in this specific JD and this specific resume, not generic advice.
 4. Do not invent new keywords outside of the provided lists.
 
-Give 2-4 pieces of section-level feedback, grounded in the automated checks above where relevant (e.g., commenting if they lack quantified metrics or start too few lines with action verbs). For each one, set "category" to the ATS category it most affects (Searchability, Impact & Metrics, Skills Match, Grammar and Spelling, or Structure & Clarity) and "severity" (Critical = blocks ATS parsing or clearly costs points, Important = meaningfully affects it, Minor = small polish).
+Give 2-4 pieces of section-level feedback. Do NOT repeat anything about missing contact info, missing section headings, missing dates, quantified metrics, or action verbs - those are already checked separately in code. Focus on Grammar and Spelling, Structure & Clarity (organization, conciseness, readability), or job-specific Skills Match gaps instead. For each one, set "category" to the ATS category it most affects and "severity" (Critical = blocks ATS parsing or clearly costs points, Important = meaningfully affects it, Minor = small polish).
 
 Give 1-3 concrete rewrite suggestions: quote the actual "before" text from the resume exactly, propose an "after" version, and explain why it's stronger. The "before" block MUST be a literal word-for-word string match from the resume text so it can be located by the frontend.`;
 };
@@ -165,6 +165,84 @@ const IMPORTANCE_ORDER: Record<MissingKeyword['importance'], number> = { High: 0
 type SectionFeedbackItem = AuditLLMResult['sectionFeedback'][number];
 
 const SEVERITY_ORDER: Record<SectionFeedbackItem['severity'], number> = { Critical: 0, Important: 1, Minor: 2 };
+
+// Searchability and Impact & Metrics are both fully derivable from
+// runResumeChecks, which is already deterministic - so these are generated
+// in code, not asked of the LLM. This is what makes each category's issue
+// count and its listed content the same thing everywhere: count = items.length.
+const structuralFeedback = (checks: ResumeChecks): SectionFeedbackItem[] => {
+  const items: SectionFeedbackItem[] = [];
+
+  if (!checks.hasEmail) {
+    items.push({
+      category: 'Searchability',
+      severity: 'Critical',
+      section: 'Contact Info',
+      issue: 'No email address found on the resume.',
+      suggestion: 'Add a professional email address near the top so recruiters and ATS systems can find it.',
+    });
+  }
+  if (!checks.hasPhone) {
+    items.push({
+      category: 'Searchability',
+      severity: 'Critical',
+      section: 'Contact Info',
+      issue: 'No phone number found on the resume.',
+      suggestion: 'Add a phone number near the top of the resume.',
+    });
+  }
+  if (!checks.hasEducationSection) {
+    items.push({
+      category: 'Searchability',
+      severity: 'Important',
+      section: 'Section Headings',
+      issue: 'No clearly labeled education section found.',
+      suggestion: 'Add an "Education" heading so ATS systems can find and parse it correctly.',
+    });
+  }
+  if (!checks.hasExperienceSection) {
+    items.push({
+      category: 'Searchability',
+      severity: 'Important',
+      section: 'Section Headings',
+      issue: 'No clearly labeled work experience section found.',
+      suggestion: 'Add an "Experience" or "Work History" heading so ATS systems can find and parse it correctly.',
+    });
+  }
+  if (!checks.hasDateRange) {
+    items.push({
+      category: 'Searchability',
+      severity: 'Important',
+      section: 'Dates',
+      issue: 'No consistent date ranges found for your work history.',
+      suggestion: 'Use a consistent "Mon YYYY - Mon YYYY" format for each role so ATS systems can parse your timeline.',
+    });
+  }
+
+  const quantifiedRatio = checks.totalLineCount === 0 ? 0 : checks.quantifiedLineCount / checks.totalLineCount;
+  if (quantifiedRatio < 0.15) {
+    items.push({
+      category: 'Impact & Metrics',
+      severity: 'Important',
+      section: 'Quantified Results',
+      issue: `Only ${checks.quantifiedLineCount} of ${checks.totalLineCount} lines include a measurable result.`,
+      suggestion: 'Add numbers, percentages, or dollar amounts to more bullet points to show concrete impact.',
+    });
+  }
+
+  const actionVerbRatio = checks.totalLineCount === 0 ? 0 : checks.actionVerbLineCount / checks.totalLineCount;
+  if (actionVerbRatio < 0.3) {
+    items.push({
+      category: 'Impact & Metrics',
+      severity: 'Minor',
+      section: 'Action Verbs',
+      issue: `Only ${checks.actionVerbLineCount} of ${checks.totalLineCount} lines start with a strong action verb.`,
+      suggestion: 'Start more bullets with strong verbs like "Led", "Built", or "Reduced" instead of passive phrasing.',
+    });
+  }
+
+  return items;
+};
 
 const scoreKeywords = (matched: MatchedKeyword[], missing: MissingKeyword[]): number => {
   const total = matched.length + missing.length;
@@ -209,8 +287,9 @@ export const runAudit = async (resume: Resume, job: Job | null): Promise<AuditRe
     (a, b) => IMPORTANCE_ORDER[a.importance] - IMPORTANCE_ORDER[b.importance],
   );
 
-  // Same for feedback - Critical first, then Important, then Minor.
-  const sectionFeedback = [...llmResult.sectionFeedback].sort(
+  // Merge the deterministic Searchability/Impact & Metrics items in with
+  // the LLM's own (Grammar/Structure/etc.), then sort Critical first.
+  const sectionFeedback = [...structuralFeedback(checks), ...llmResult.sectionFeedback].sort(
     (a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity],
   );
 

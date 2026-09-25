@@ -27,6 +27,7 @@ interface ScoreSummaryCardProps {
   // Only shown when provided - i.e. when the audit was run against a
   // selected job, not a general (job-less) check.
   onSaveToJob?: () => void;
+  onSelectCategory: (label: string) => void;
 }
 
 const RADIUS = 52;
@@ -63,13 +64,13 @@ const ScoreRing = ({ score }: { score: number }) => {
   );
 };
 
-const CategoryBar = ({ label, score, issueCount }: ScoreCategory) => {
+const CategoryBar = ({ label, score, issueCount, onClick }: ScoreCategory & { onClick: () => void }) => {
   const labelColor = gradeColor(score);
 
   return (
-    <div>
+    <button type="button" onClick={onClick} className="w-full text-left">
       <div className="mb-1.5 flex items-center justify-between gap-3 text-sm">
-        <span className="font-medium text-zinc-700">{label}</span>
+        <span className="font-medium text-zinc-700 hover:text-primary-600">{label}</span>
         <span className={cn('shrink-0 text-xs font-medium', labelColor)}>
           {issueCount === 0 ? 'No issues' : `${issueCount} issue${issueCount === 1 ? '' : 's'} to fix`}
         </span>
@@ -80,7 +81,7 @@ const CategoryBar = ({ label, score, issueCount }: ScoreCategory) => {
           style={{ width: `${Math.max(0, Math.min(100, score))}%` }}
         />
       </div>
-    </div>
+    </button>
   );
 };
 
@@ -141,6 +142,7 @@ export const ScoreSummaryCard = ({
   triage,
   onCheckAnother,
   onSaveToJob,
+  onSelectCategory,
 }: ScoreSummaryCardProps) => {
   return (
     <Card className="p-6">
@@ -152,7 +154,7 @@ export const ScoreSummaryCard = ({
 
         <div className="flex flex-1 flex-col gap-4">
           {categories.map((category) => (
-            <CategoryBar key={category.label} {...category} />
+            <CategoryBar key={category.label} {...category} onClick={() => onSelectCategory(category.label)} />
           ))}
         </div>
 
