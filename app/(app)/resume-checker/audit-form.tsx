@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Briefcase, FileText } from 'lucide-react';
+import { Briefcase, FileText, Printer } from 'lucide-react';
 
 import { ResumeSourceTabs } from '@/components/resume-source-tabs';
 import { TargetJobPanel } from '@/components/resume-checker/target-job-panel';
@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/card';
 import { Audit, Job, Resume } from '@/generated/prisma/client';
 import { LoadingModal, StatusType } from '@/components/ui/loading-modal';
 import AuditResults from '@/components/ui/audit-results';
+import CheckerDescription from '@/components/resume-checker/checker-description';
 import { AuditResult } from '@/lib/audit';
 
 // /api/audit returns the raw Prisma Audit row: score sits at the top
@@ -52,6 +53,23 @@ const AuditForm = ({ jobs, resumes }: AuditFormProps) => {
   };
   return (
     <>
+      <div className="mb-3 flex w-full max-w-5xl items-start justify-between gap-4">
+        <div className="text-left">
+          <h1 className="text-xl font-semibold text-zinc-900">Resume Checker</h1>
+          <p className="mt-1 max-w-2xl text-sm text-zinc-500">
+            Get a free ATS check of your resume on its own, or match it against a job posting. Paste a job description in or pick from your saved
+            jobs.
+          </p>
+        </div>
+
+        {result && (
+          <Button variant="outline" size="sm" onClick={() => window.print()}>
+            <Printer className="h-4 w-4" />
+            Print
+          </Button>
+        )}
+      </div>
+
       {result ? (
         <AuditResults
           audit={result}
@@ -95,6 +113,8 @@ const AuditForm = ({ jobs, resumes }: AuditFormProps) => {
           </div>
         </Card>
       )}
+
+      {!result && <CheckerDescription />}
 
       <LoadingModal
         open={scoring}

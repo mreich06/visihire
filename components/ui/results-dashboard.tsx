@@ -2,6 +2,7 @@ import type { HTMLAttributes } from 'react';
 
 import { cn } from '@/lib/cn';
 import type { AuditResult } from '@/lib/audit';
+import { ReportTabs } from './report-tabs';
 import { ScoreSummaryCard, type ScoreCategory, type TriageCounts } from './score-summary-card';
 
 interface ResultsDashboardProps extends HTMLAttributes<HTMLDivElement> {
@@ -33,6 +34,9 @@ const buildCategories = (result: AuditResult): ScoreCategory[] => {
   const totalKeywords = matchedKeywords.length + missingKeywords.length;
   const skillsScore = totalKeywords === 0 ? 100 : Math.round((matchedKeywords.length / totalKeywords) * 100);
 
+  const feedbackByCategory = (category: ScoreCategory['label']) =>
+    sectionFeedback.filter((item) => item.category === category).length;
+
   return [
     {
       label: 'Searchability',
@@ -49,14 +53,15 @@ const buildCategories = (result: AuditResult): ScoreCategory[] => {
       score: skillsScore,
       issueCount: missingKeywords.length,
     },
-    // TODO: Add dedicated field on AuditLLMResultSchema for spelling/grammar
-    { label: 'Grammar and Spelling', score: 100, issueCount: 0 },
-    // stand-in using the general feedback count until sectionFeedback
-    // carries its own category/severity - see lib/audit.ts.
+    {
+      label: 'Grammar and Spelling',
+      score: Math.max(0, 100 - feedbackByCategory('Grammar and Spelling') * 20),
+      issueCount: feedbackByCategory('Grammar and Spelling'),
+    },
     {
       label: 'Structure & Clarity',
-      score: Math.max(0, 100 - sectionFeedback.length * 15),
-      issueCount: sectionFeedback.length,
+      score: Math.max(0, 100 - feedbackByCategory('Structure & Clarity') * 15),
+      issueCount: feedbackByCategory('Structure & Clarity'),
     },
   ];
 };
@@ -73,16 +78,25 @@ const buildTriage = (result: AuditResult): TriageCounts => {
 };
 
 const ResultsDashboard = ({ className, result, onCheckAnother, onSaveToJob, ...props }: ResultsDashboardProps) => {
+  const categories = buildCategories(result);
+
   return (
     <div className={cn('flex flex-col gap-4 rounded-xl bg-zinc-50 p-4', className)} {...props}>
       <ScoreSummaryCard
         score={result.score}
         grade={gradeLabel(result.score)}
         summary={result.summary}
-        categories={buildCategories(result)}
+        categories={categories}
         triage={buildTriage(result)}
         onCheckAnother={onCheckAnother}
         onSaveToJob={onSaveToJob}
+      />
+
+      <ReportTabs
+        categories={categories}
+        sectionFeedback={result.sectionFeedback}
+        missingKeywords={result.missingKeywords}
+        rewriteSuggestions={result.rewriteSuggestions}
       />
     </div>
   );

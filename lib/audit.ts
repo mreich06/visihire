@@ -15,9 +15,17 @@ const AuditLLMResultSchema = z.object({
       contextFound: z.enum(['Strong', 'Mentioned Only', 'Keyword Stuffed']),
     }),
   ),
-  missingKeywords: z.array(z.string()),
+  missingKeywords: z.array(
+    z.object({
+      keyword: z.string(),
+      importance: z.enum(['High', 'Medium', 'Low']),
+      reason: z.string(),
+    }),
+  ),
   sectionFeedback: z.array(
     z.object({
+      category: z.enum(['Searchability', 'Impact & Metrics', 'Skills Match', 'Grammar and Spelling', 'Structure & Clarity']),
+      severity: z.enum(['Critical', 'Important', 'Minor']),
       section: z.string(),
       issue: z.string(),
       suggestion: z.string(),
@@ -115,10 +123,10 @@ If a job was given:
    - "Strong": used within a concrete achievement or experience bullet (e.g. "Led a team using React to ship...", not just listed on its own).
    - "Mentioned Only": appears once, only in a skills list or passing mention, with no supporting example of actually using it.
    - "Keyword Stuffed": the occurrence count is unusually high (roughly 4 or more) relative to how substantively it's used, or it's crammed into a list without natural sentence context. This is a red flag to call out, not a bonus.
-3. Place terms with an occurrence count of 0 into "missingKeywords".
+3. For terms with an occurrence count of 0, add them to "missingKeywords" with an "importance" (High/Medium/Low - how central this term is to THIS job's requirements) and a one-sentence "reason" grounded in this specific JD and this specific resume, not generic advice.
 4. Do not invent new keywords outside of the provided lists.
 
-Give 2-4 pieces of section-level feedback, grounded in the automated checks above where relevant (e.g., commenting if they lack quantified metrics or start too few lines with action verbs). 
+Give 2-4 pieces of section-level feedback, grounded in the automated checks above where relevant (e.g., commenting if they lack quantified metrics or start too few lines with action verbs). For each one, set "category" to the ATS category it most affects (Searchability, Impact & Metrics, Skills Match, Grammar and Spelling, or Structure & Clarity) and "severity" (Critical = blocks ATS parsing or clearly costs points, Important = meaningfully affects it, Minor = small polish).
 
 Give 1-3 concrete rewrite suggestions: quote the actual "before" text from the resume exactly, propose an "after" version, and explain why it's stronger. The "before" block MUST be a literal word-for-word string match from the resume text so it can be located by the frontend.`;
 };
@@ -150,7 +158,15 @@ const KEYWORD_CONTEXT_WEIGHTS: Record<MatchedKeyword['contextFound'], number> = 
   'Keyword Stuffed': -0.5,
 };
 
-const scoreKeywords = (matched: MatchedKeyword[], missing: string[]): number => {
+type MissingKeyword = AuditLLMResult['missingKeywords'][number];
+
+const IMPORTANCE_ORDER: Record<MissingKeyword['importance'], number> = { High: 0, Medium: 1, Low: 2 };
+
+type SectionFeedbackItem = AuditLLMResult['sectionFeedback'][number];
+
+const SEVERITY_ORDER: Record<SectionFeedbackItem['severity'], number> = { Critical: 0, Important: 1, Minor: 2 };
+
+const scoreKeywords = (matched: MatchedKeyword[], missing: MissingKeyword[]): number => {
   const total = matched.length + missing.length;
   if (total === 0) return 1;
 
@@ -187,7 +203,18 @@ export const runAudit = async (resume: Resume, job: Job | null): Promise<AuditRe
   const llmResult = await generateStructured(prompt, AuditLLMResultSchema);
   const score = computeScore(checks, llmResult, job !== null);
 
-  return { ...llmResult, score, checks };
+  // Sort deterministically in code rather than trusting the model's
+  // ordering - High/Medium/Low, highest first.
+  const missingKeywords = [...llmResult.missingKeywords].sort(
+    (a, b) => IMPORTANCE_ORDER[a.importance] - IMPORTANCE_ORDER[b.importance],
+  );
+
+  // Same for feedback - Critical first, then Important, then Minor.
+  const sectionFeedback = [...llmResult.sectionFeedback].sort(
+    (a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity],
+  );
+
+  return { ...llmResult, missingKeywords, sectionFeedback, score, checks };
 };
 
 interface GetOrCreateAuditParams {

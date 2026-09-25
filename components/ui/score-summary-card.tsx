@@ -34,6 +34,7 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 const gradeTone = (score: number) => (score >= 80 ? 'success' : score >= 60 ? 'warning' : 'danger');
 const gradeColor = (score: number) => (score >= 80 ? 'text-success' : score >= 60 ? 'text-warning' : 'text-danger');
+const levelBarColor = (score: number) => (score >= 80 ? 'bg-success' : score >= 60 ? 'bg-warning' : 'bg-danger');
 
 const ScoreRing = ({ score }: { score: number }) => {
   const offset = CIRCUMFERENCE - (score / 100) * CIRCUMFERENCE;
@@ -63,8 +64,7 @@ const ScoreRing = ({ score }: { score: number }) => {
 };
 
 const CategoryBar = ({ label, score, issueCount }: ScoreCategory) => {
-  const barColor = issueCount === 0 ? 'bg-success' : issueCount <= 3 ? 'bg-primary-500' : 'bg-danger';
-  const labelColor = issueCount === 0 ? 'text-success' : issueCount <= 3 ? 'text-primary-600' : 'text-danger';
+  const labelColor = gradeColor(score);
 
   return (
     <div>
@@ -76,7 +76,7 @@ const CategoryBar = ({ label, score, issueCount }: ScoreCategory) => {
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-100">
         <div
-          className={cn('h-full rounded-full transition-all duration-700 ease-out', barColor)}
+          className={cn('h-full rounded-full transition-all duration-700 ease-out', levelBarColor(score))}
           style={{ width: `${Math.max(0, Math.min(100, score))}%` }}
         />
       </div>
