@@ -16,7 +16,7 @@ const EXPERIENCE_RE = /\b(experience|work history|employment)\b/i;
 const DATE_RANGE_RE = /\b(19|20)\d{2}\b.{0,15}(present|current|(19|20)\d{2})/i;
 // Targets percentages, dollar values, and multiplier type values (like 5x, 20%, $50k)
 // Avoids catching pure years or standard numbers
-const QUANTIFIED_RE = /(?:\d+(?:\.\d+)?\s*(?:%|percent|x|X)\b)|(?:\$\s*\d+)/i;
+const QUANTIFIED_RE = /(?:\d+(?:\.\d+)?\s*%)|(?:\d+(?:\.\d+)?\s*(?:percent|x)\b)|(?:\$\s*\d+)/i;
 const ACTION_VERB_RE =
   /^(?:Led|Managed|Developed|Created|Optimized|Organized|Coordinated|Executed|Supervised|Maintained|Assisted|Provided|Designed|Built|Implemented|Increased|Reduced|Improved|Trained|Scheduled|Handled|Formulated|Drafted|Analyzed|Monitored|Reviewed)\b/i;
 
