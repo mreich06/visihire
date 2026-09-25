@@ -13,6 +13,12 @@ import { LoadingModal, StatusType } from '@/components/ui/loading-modal';
 import AuditResults from '@/components/ui/audit-results';
 import { AuditResult } from '@/lib/audit';
 
+// /api/audit returns the raw Prisma Audit row: score sits at the top
+// level, everything else (summary, keywords, checks, ...) is nested under
+// result. This is what actually comes back, as opposed to the flat
+// AuditResult shape the rest of the UI is built around.
+type AuditApiResponse = Omit<Audit, 'result'> & { result: Omit<AuditResult, 'score'> };
+
 interface AuditFormProps {
   jobs: Job[];
   resumes: Resume[];
@@ -35,8 +41,8 @@ const AuditForm = ({ jobs, resumes }: AuditFormProps) => {
         body: JSON.stringify({ resumeId: selectedResume?.id, jobId: selectedJob?.id }),
       });
       if (res.ok) {
-        const audit: AuditResult = await res.json();
-        setResult(audit);
+        const raw: AuditApiResponse = await res.json();
+        setResult({ ...raw.result, score: raw.score });
       } else {
         setError(true);
       }
