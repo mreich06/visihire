@@ -120,7 +120,7 @@ const AuditForm = ({ jobs, resumes }: AuditFormProps) => {
       <OutreachCta />
 
       <LoadingModal
-        open={scoring}
+        open={scoring || status === 'error'}
         status={status}
         title={status === 'error' ? 'Your resumé could not be evaluated' : undefined}
         description={status === 'error' ? 'Please try again.' : undefined}

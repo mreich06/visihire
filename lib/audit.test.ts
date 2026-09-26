@@ -1,13 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { generateStructuredMock } = vi.hoisted(() => ({ generateStructuredMock: vi.fn() }));
+const { generateStructuredMock, dbMock } = vi.hoisted(() => ({
+  generateStructuredMock: vi.fn(),
+  dbMock: {
+    resume: { findUnique: vi.fn() },
+    job: { findUnique: vi.fn() },
+    audit: { findFirst: vi.fn(), create: vi.fn(), update: vi.fn() },
+  },
+}));
 
 vi.mock('@/lib/llm', () => ({
   generateStructured: generateStructuredMock,
   LLM_MODEL: 'test-model',
 }));
 
-import { runAudit } from './audit';
+vi.mock('@/lib/db', () => ({ db: dbMock }));
+
+import { getOrCreateAudit, runAudit } from './audit';
 import type { Job, Resume } from '@/generated/prisma/client';
 
 const makeResume = (overrides: Partial<Resume> = {}): Resume => ({
@@ -187,5 +196,90 @@ describe('runAudit', () => {
     const strongResult = await runAudit(resume, job);
 
     expect(stuffedResult.score).toBeLessThan(strongResult.score);
+  });
+});
+
+describe('getOrCreateAudit', () => {
+  beforeEach(() => {
+    generateStructuredMock.mockReset().mockResolvedValue(EMPTY_LLM_RESULT);
+    dbMock.resume.findUnique.mockReset();
+    dbMock.job.findUnique.mockReset();
+    dbMock.audit.findFirst.mockReset();
+    dbMock.audit.create.mockReset().mockResolvedValue({ id: 'audit-new' });
+    dbMock.audit.update.mockReset().mockResolvedValue({ id: 'audit-updated' });
+  });
+
+  it('throws if the resume does not exist', async () => {
+    dbMock.resume.findUnique.mockResolvedValue(null);
+
+    await expect(getOrCreateAudit({ userId: 'user-1', resumeId: 'missing' })).rejects.toThrow('Resume not found.');
+  });
+
+  it('throws if the resume belongs to a different user', async () => {
+    dbMock.resume.findUnique.mockResolvedValue(makeResume({ userId: 'someone-else' }));
+
+    await expect(getOrCreateAudit({ userId: 'user-1', resumeId: 'resume-1' })).rejects.toThrow('Resume not found.');
+  });
+
+  it('throws if the job does not exist', async () => {
+    dbMock.resume.findUnique.mockResolvedValue(makeResume());
+    dbMock.job.findUnique.mockResolvedValue(null);
+
+    await expect(getOrCreateAudit({ userId: 'user-1', resumeId: 'resume-1', jobId: 'missing' })).rejects.toThrow('Job not found.');
+  });
+
+  it('throws if the job belongs to a different user', async () => {
+    dbMock.resume.findUnique.mockResolvedValue(makeResume());
+    dbMock.job.findUnique.mockResolvedValue(makeJob({ userId: 'someone-else' }));
+
+    await expect(getOrCreateAudit({ userId: 'user-1', resumeId: 'resume-1', jobId: 'job-1' })).rejects.toThrow('Job not found.');
+  });
+
+  it('returns the cached audit without calling the LLM when it is fresh', async () => {
+    const resume = makeResume({ updatedAt: new Date('2026-01-01') });
+    const existing = { id: 'audit-cached', updatedAt: new Date('2026-01-02') };
+    dbMock.resume.findUnique.mockResolvedValue(resume);
+    dbMock.audit.findFirst.mockResolvedValue(existing);
+
+    const result = await getOrCreateAudit({ userId: 'user-1', resumeId: 'resume-1' });
+
+    expect(result).toBe(existing);
+    expect(generateStructuredMock).not.toHaveBeenCalled();
+    expect(dbMock.audit.create).not.toHaveBeenCalled();
+    expect(dbMock.audit.update).not.toHaveBeenCalled();
+  });
+
+  it('regenerates and updates the cached row when the resume changed since it was cached', async () => {
+    const resume = makeResume({ updatedAt: new Date('2026-02-01') });
+    const existing = { id: 'audit-cached', updatedAt: new Date('2026-01-01') };
+    dbMock.resume.findUnique.mockResolvedValue(resume);
+    dbMock.audit.findFirst.mockResolvedValue(existing);
+
+    await getOrCreateAudit({ userId: 'user-1', resumeId: 'resume-1' });
+
+    expect(generateStructuredMock).toHaveBeenCalled();
+    expect(dbMock.audit.update).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 'audit-cached' } }));
+    expect(dbMock.audit.create).not.toHaveBeenCalled();
+  });
+
+  it('creates a new row when nothing is cached yet', async () => {
+    const resume = makeResume();
+    dbMock.resume.findUnique.mockResolvedValue(resume);
+    dbMock.audit.findFirst.mockResolvedValue(null);
+
+    await getOrCreateAudit({ userId: 'user-1', resumeId: 'resume-1' });
+
+    expect(dbMock.audit.create).toHaveBeenCalledOnce();
+    expect(dbMock.audit.update).not.toHaveBeenCalled();
+  });
+
+  it('looks up the cache with jobId null for a general, job-less audit', async () => {
+    const resume = makeResume();
+    dbMock.resume.findUnique.mockResolvedValue(resume);
+    dbMock.audit.findFirst.mockResolvedValue(null);
+
+    await getOrCreateAudit({ userId: 'user-1', resumeId: 'resume-1' });
+
+    expect(dbMock.audit.findFirst).toHaveBeenCalledWith({ where: { resumeId: 'resume-1', jobId: null } });
   });
 });
