@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 // ResumeSourceTabs renders ResumeUpload, which imports the uploadResume from @app/actions/profile
@@ -10,6 +11,11 @@ vi.mock('@/app/actions/profile', () => ({
 
 import { ResumeSourceTabs } from './resume-source-tabs';
 import { Resume } from '@/generated/prisma/client';
+
+const ResumeSourceTabsHarness = ({ resumes }: { resumes: Resume[] }) => {
+  const [selected, setSelected] = useState<Resume | null>(null);
+  return <ResumeSourceTabs resumes={resumes} selected={selected} setSelected={setSelected} />;
+};
 
 const mockResumes: Resume[] = [
   {
@@ -34,7 +40,7 @@ const mockResumes: Resume[] = [
 
 describe('ResumeSourceTabs', () => {
   it('Does not show the dropdown if no resumes are saved', async () => {
-    render(<ResumeSourceTabs resumes={[]} />);
+    render(<ResumeSourceTabsHarness resumes={[]} />);
     const user = userEvent.setup();
 
     await user.click(screen.getByRole('button', { name: /Use a saved resume/i }));
@@ -43,7 +49,7 @@ describe('ResumeSourceTabs', () => {
   });
 
   it('Shows the dropdown and the resumes belonging to user', async () => {
-    render(<ResumeSourceTabs resumes={mockResumes} />);
+    render(<ResumeSourceTabsHarness resumes={mockResumes} />);
     const user = userEvent.setup();
 
     await user.click(screen.getByRole('button', { name: /Use a saved resume/i }));
@@ -54,7 +60,7 @@ describe('ResumeSourceTabs', () => {
   });
 
   it('Shows the selected resume when the user clicks on it in the dropdown', async () => {
-    render(<ResumeSourceTabs resumes={mockResumes} />);
+    render(<ResumeSourceTabsHarness resumes={mockResumes} />);
     const user = userEvent.setup();
 
     await user.click(screen.getByRole('button', { name: /Use a saved resume/i }));

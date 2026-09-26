@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useState } from 'react';
 import { describe, expect, it } from 'vitest';
 import { TargetJobPanel } from './target-job-panel';
 import { Job } from '@/generated/prisma/client';
@@ -35,9 +36,14 @@ const mockJobs: Job[] = [
   },
 ];
 
+const TargetJobPanelHarness = ({ jobs }: { jobs: Job[] }) => {
+  const [selected, setSelected] = useState<Job | null>(null);
+  return <TargetJobPanel jobs={jobs} selected={selected} setSelected={setSelected} />;
+};
+
 describe('TargetJobPanel', () => {
   it('Typing in the search box filters by search term', async () => {
-    render(<TargetJobPanel jobs={mockJobs} />);
+    render(<TargetJobPanelHarness jobs={mockJobs} />);
     const user = userEvent.setup();
 
     await user.click(screen.getByRole('button', { name: /fill from a tracked job/i }));
@@ -48,7 +54,7 @@ describe('TargetJobPanel', () => {
   });
 
   it('Shows no result if search term does not match jobs', async () => {
-    render(<TargetJobPanel jobs={mockJobs} />);
+    render(<TargetJobPanelHarness jobs={mockJobs} />);
     const user = userEvent.setup();
 
     await user.click(screen.getByRole('button', { name: /fill from a tracked job/i }));
@@ -58,7 +64,7 @@ describe('TargetJobPanel', () => {
   });
 
   it('Fills the title and job description fields when a job is selected', async () => {
-    render(<TargetJobPanel jobs={mockJobs} />);
+    render(<TargetJobPanelHarness jobs={mockJobs} />);
     const user = userEvent.setup();
 
     await user.click(screen.getByRole('button', { name: /fill from a tracked job/i }));

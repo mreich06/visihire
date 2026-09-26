@@ -1,15 +1,17 @@
 'use client';
 
 import { AlertCircle, FileText, UploadCloud } from 'lucide-react';
-import { useActionState, useRef, useState, type DragEvent } from 'react';
+import { useActionState, useEffect, useRef, useState, type DragEvent } from 'react';
 
 import { uploadResume, type FormState } from '@/app/actions/profile';
 import { cn } from '@/lib/cn';
+import type { Resume } from '@/generated/prisma/client';
 
 interface ResumeUploadProps {
   resumeFileName: string | null;
   resumeText: string | null;
   withFile?: boolean;
+  onUploaded?: (resume: Resume) => void;
 }
 
 type PendingFile = { name: string; size: number };
@@ -18,7 +20,7 @@ const initialState: FormState = { error: null };
 
 const formatFileSize = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 
-export const ResumeUpload = ({ resumeFileName, resumeText, withFile = true }: ResumeUploadProps) => {
+export const ResumeUpload = ({ resumeFileName, resumeText, withFile = true, onUploaded }: ResumeUploadProps) => {
   const [state, formAction, pending] = useActionState(uploadResume, initialState);
   const [dragging, setDragging] = useState(false);
   const [pendingFile, setPendingFile] = useState<PendingFile | null>(null);
@@ -27,12 +29,9 @@ export const ResumeUpload = ({ resumeFileName, resumeText, withFile = true }: Re
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
-  // React resets the <form> once the action settles, which clears
-  // inputRef.current.files before we'd get a chance to read it here - so
-  // capture the file's name/size at selection time (see submitFile) instead
-  // of trying to re-read it off the input after the fact. Comparing against
-  // prevPending during render (not in an effect) is React's recommended
-  // pattern for reacting to a value change without an extra render pass.
+  // The form resets when the action settles, clearing inputRef.current.files -
+  // capture file info at selection time instead (see submitFile). Comparing
+  // prevPending during render avoids the extra render pass an effect would add.
   if (pending !== prevPending) {
     setPrevPending(pending);
     if (prevPending && !pending) {
@@ -40,6 +39,14 @@ export const ResumeUpload = ({ resumeFileName, resumeText, withFile = true }: Re
       setPendingFile(null);
     }
   }
+
+  // Use useEffect bc calling a parent's setState while
+  // this component is rendering isn't safe since parent has already
+  // rendered in this pass. state.resume is a fresh object each time a new
+  // upload succeeds, so this only fires once per successful upload
+  useEffect(() => {
+    if (state.resume) onUploaded?.(state.resume);
+  }, [state.resume, onUploaded]);
 
   const submitFile = (file: File) => {
     setJustUploaded(null);
@@ -110,9 +117,7 @@ export const ResumeUpload = ({ resumeFileName, resumeText, withFile = true }: Re
           {status === 'error' ? (
             <AlertCircle className="h-8 w-8 text-danger" />
           ) : (
-            <UploadCloud
-              className={cn('h-8 w-8', status === 'success' ? 'text-success' : 'text-primary-500')}
-            />
+            <UploadCloud className={cn('h-8 w-8', status === 'success' ? 'text-success' : 'text-primary-500')} />
           )}
 
           {status === 'success' && justUploaded ? (

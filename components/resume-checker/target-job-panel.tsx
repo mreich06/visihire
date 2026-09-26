@@ -1,7 +1,7 @@
 'use client';
 
 import { Search } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 
 import { Dropdown, DropdownItem } from '@/components/ui/dropdown';
 import { Input, Textarea } from '@/components/ui/input';
@@ -9,13 +9,14 @@ import type { Job } from '@/generated/prisma/client';
 
 interface TargetJobPanelProps {
   jobs: Job[];
+  selected: Job | null;
+  setSelected: Dispatch<SetStateAction<Job | null>>;
 }
 
 const MAX_RESULTS = 6;
 
-export const TargetJobPanel = ({ jobs }: TargetJobPanelProps) => {
+export const TargetJobPanel = ({ jobs, selected, setSelected }: TargetJobPanelProps) => {
   const [search, setSearch] = useState('');
-  const [selected, setSelected] = useState<Job | null>(null);
   const [title, setTitle] = useState('');
   const [jdText, setJdText] = useState('');
 

@@ -5,8 +5,9 @@ import { revalidatePath } from 'next/cache';
 import { requireUser } from '@/lib/auth-guard';
 import { db } from '@/lib/db';
 import { extractPdfText } from '@/lib/pdf';
+import type { Resume } from '@/generated/prisma/client';
 
-export type FormState = { error: string | null };
+export type FormState = { error: string | null; resume?: Resume };
 
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 
@@ -35,11 +36,11 @@ export const uploadResume = async (prevState: FormState, formData: FormData): Pr
 
   const title = file.name.replace(/\.pdf$/i, '');
 
-  await db.resume.create({
+  const resume = await db.resume.create({
     data: { userId: user.id, title, text: resumeText, resumeFileName: file.name },
   });
 
   revalidatePath('/profile');
   revalidatePath('/resume-checker');
-  return { error: null };
+  return { error: null, resume };
 };

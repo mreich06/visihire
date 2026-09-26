@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { Button } from './button';
+import { Button, buttonClasses } from './button';
 
 describe('Button', () => {
   it('renders its children', () => {
@@ -35,5 +35,23 @@ describe('Button', () => {
   it('merges a custom className with the variant classes', () => {
     render(<Button className="mt-auto">Save</Button>);
     expect(screen.getByRole('button')).toHaveClass('mt-auto', 'bg-primary-600');
+  });
+});
+
+describe('buttonClasses', () => {
+  it('produces the same classes a real Button with the same variant would render', () => {
+    render(<Button variant="secondary">Save</Button>);
+    const rendered = screen.getByRole('button').className;
+
+    expect(buttonClasses('secondary')).toBe(rendered);
+  });
+
+  it('defaults to the primary variant and md size', () => {
+    expect(buttonClasses()).toContain('bg-primary-600');
+    expect(buttonClasses()).toContain('px-4');
+  });
+
+  it('merges in a custom className', () => {
+    expect(buttonClasses('primary', 'md', 'w-full')).toContain('w-full');
   });
 });
