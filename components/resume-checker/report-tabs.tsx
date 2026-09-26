@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 
 import { cn } from '@/lib/cn';
 import type { AuditResult } from '@/lib/audit';
-import { Badge } from './badge';
+import { Badge } from '@/components/ui/badge';
 import type { ScoreCategory } from './score-summary-card';
 
 type MissingKeyword = AuditResult['missingKeywords'][number];

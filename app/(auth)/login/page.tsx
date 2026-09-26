@@ -1,5 +1,5 @@
 import { LoginForm } from '@/components/auth/login-form';
-import { Logo } from '@/components/logo';
+import { Logo } from '@/components/layout/logo';
 
 const LoginPage = async ({
   searchParams,

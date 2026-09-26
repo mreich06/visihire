@@ -3,7 +3,7 @@
 import { FileText, Upload } from 'lucide-react';
 import { Dispatch, SetStateAction, useState } from 'react';
 
-import { ResumeUpload } from '@/components/resume-upload';
+import { ResumeUpload } from '@/components/resume/resume-upload';
 import { Dropdown, DropdownItem } from '@/components/ui/dropdown';
 import { cn } from '@/lib/cn';
 import type { Resume } from '@/generated/prisma/client';

@@ -1,5 +1,5 @@
 import { logoutAction } from '@/app/actions/auth';
-import { ResumeUpload } from '@/components/resume-upload';
+import { ResumeUpload } from '@/components/resume/resume-upload';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { FadeIn } from '@/components/ui/fade-in';

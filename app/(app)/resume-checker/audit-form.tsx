@@ -3,14 +3,14 @@
 import { useState } from 'react';
 import { Briefcase, FileText, Printer } from 'lucide-react';
 
-import { ResumeSourceTabs } from '@/components/resume-source-tabs';
+import { ResumeSourceTabs } from '@/components/resume/resume-source-tabs';
 import { TargetJobPanel } from '@/components/resume-checker/target-job-panel';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Audit, Job, Resume } from '@/generated/prisma/client';
 import { LoadingModal, StatusType } from '@/components/ui/loading-modal';
-import AuditResults from '@/components/ui/audit-results';
+import AuditResults from '@/components/resume-checker/audit-results';
 import CheckerDescription from '@/components/resume-checker/checker-description';
 import OutreachCta from '@/components/resume-checker/outreach-cta';
 import { AuditResult } from '@/lib/audit';
