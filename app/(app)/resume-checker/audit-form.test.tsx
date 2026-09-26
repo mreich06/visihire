@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/components/resume-source-tabs', () => ({
+vi.mock('@/components/resume/resume-source-tabs', () => ({
   ResumeSourceTabs: ({ setSelected }: { setSelected: (resume: { id: string; title: string }) => void }) => (
     <button onClick={() => setSelected({ id: 'resume-1', title: 'My Resume' })}>Pick a resume</button>
   ),
@@ -14,7 +14,7 @@ vi.mock('@/components/resume-checker/target-job-panel', () => ({
   ),
 }));
 
-vi.mock('@/components/ui/audit-results', () => ({
+vi.mock('@/components/resume-checker/audit-results', () => ({
   default: ({ onCheckAnother, onSaveToJob }: { onCheckAnother: () => void; onSaveToJob?: () => void }) => (
     <div>
       <p>AuditResults rendered</p>

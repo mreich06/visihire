@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { FadeIn } from '@/components/ui/fade-in';
-import { Logo } from '@/components/logo';
+import { Logo } from '@/components/layout/logo';
 import WorkflowSection from '@/components/workflow-section';
 
 const FEATURES = [

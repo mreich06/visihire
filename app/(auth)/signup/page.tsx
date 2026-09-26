@@ -1,5 +1,5 @@
 import { SignupForm } from '@/components/auth/signup-form';
-import { Logo } from '@/components/logo';
+import { Logo } from '@/components/layout/logo';
 
 const SignupPage = () => {
   return (

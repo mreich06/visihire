@@ -4,12 +4,12 @@ import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-p
 import { useState } from 'react';
 
 import { moveJob } from '@/app/actions/jobs';
-import JobCard from '@/components/job-card';
+import JobCard from '@/components/jobs/job-card';
 import { Button } from '@/components/ui/button';
 import { FadeIn } from '@/components/ui/fade-in';
 import type { Job, JobStatus } from '@/generated/prisma/client';
 import Modal from '../ui/modal';
-import JobForm from '../job-form';
+import JobForm from '../jobs/job-form';
 
 const COLUMNS: { status: JobStatus; label: string }[] = [
   { status: 'WISHLIST', label: 'Wishlist' },

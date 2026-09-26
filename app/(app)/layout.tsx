@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
-import { AppSidebar } from '@/components/app-sidebar';
-import { Logo } from '@/components/logo';
+import { AppSidebar } from '@/components/layout/app-sidebar';
+import { Logo } from '@/components/layout/logo';
 import { requireUser } from '@/lib/auth-guard';
 
 const Layout = async ({ children }: { children: ReactNode }) => {

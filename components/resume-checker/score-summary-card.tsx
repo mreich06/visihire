@@ -1,9 +1,9 @@
 import { AlertTriangle, Bookmark, CheckCircle2, ChevronRight, Lightbulb, RefreshCw } from 'lucide-react';
 
 import { cn } from '@/lib/cn';
-import { Badge } from './badge';
-import { Button } from './button';
-import { Card } from './card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 export interface ScoreCategory {
   label: string;
