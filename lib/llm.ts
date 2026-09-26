@@ -6,10 +6,15 @@ import { z } from 'zod';
 
 export const LLM_MODEL = 'deepseek-flash';
 
-const client = new OpenAI({
-  baseURL: 'https://api.deepseek.com',
-  apiKey: process.env.DEEPSEEK_API_KEY,
-});
+// Handles missing api key
+let client: OpenAI | null = null;
+
+const getClient = () => {
+  if (!client) {
+    client = new OpenAI({ baseURL: 'https://api.deepseek.com', apiKey: process.env.DEEPSEEK_API_KEY });
+  }
+  return client;
+};
 
 const MAX_ATTEMPTS = 2;
 
@@ -42,7 +47,7 @@ export const generateStructured = async <Schema extends z.ZodType>(prompt: strin
       reasoning_effort: 'high',
     };
 
-    const completion = await client.chat.completions.create(params);
+    const completion = await getClient().chat.completions.create(params);
     const text = completion.choices[0]?.message?.content;
 
     if (!text) {
